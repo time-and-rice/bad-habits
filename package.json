@@ -15,9 +15,10 @@
     "emu:dev": "firebase emulators:start --only auth,functions,firestore --import=./fire-emu-data --export-on-exit",
     "dev:all": "concurrently -n \"dev,emu:dev,functions:dev\" \"yarn dev\" \"yarn emu:dev\" \"yarn --cwd functions build:watch\"",
     "predeploy:hosting": "yarn build",
-    "deploy:hosting": "firebase deploy --only hosting,firestore",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:firestore": "firebase deploy --only firestore",
     "deploy:functions": "firebase deploy --only functions",
-    "deploy:all": "yarn deploy:hosting && yarn deploy:functions"
+    "deploy:all": "yarn deploy:hosting && yarn deploy:firestore && yarn deploy:functions"
   },
   "dependencies": {
     "firebase": "^10.4.0",
@@ -26,18 +27,23 @@
     "react-router-dom": "^6.16.0"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.1",
+    "daisyui": "^3.8.2",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "eslint-plugin-simple-import-sort": "^10.0.0",
+    "postcss": "^8.4.31",
     "prettier": "^3.0.3",
+    "tailwindcss": "^3.3.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-tsconfig-paths": "^4.2.1"
