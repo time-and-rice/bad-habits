@@ -1,4 +1,4 @@
 import "module-alias/register";
 import "./firebase/initialize";
 
-export { home } from "./handlers/home";
+export { healthCheck } from "./handlers/health-check";

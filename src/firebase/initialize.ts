@@ -13,9 +13,9 @@ const app = initializeApp({
   measurementId: "G-775HE9138L",
 });
 
-const auth = getAuth(app);
-const db = getFirestore(app);
-const functions = getFunctions(app, "asia-northeast1");
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const functions = getFunctions(app, "asia-northeast1");
 
 if (process.env.NODE_ENV != "production") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
@@ -23,4 +23,11 @@ if (process.env.NODE_ENV != "production") {
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 
-export { auth, db, functions };
+console.log("firebase initialized.");
+
+export function getHttpsFunctionUrl(name: string) {
+  return import.meta.env.VITE_FIREBASE_HTTPS_FUNCTIONS_URL.replace(
+    "FUNCTION_NAME",
+    name,
+  );
+}

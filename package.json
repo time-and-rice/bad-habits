@@ -12,7 +12,7 @@
     "format": "prettier -l \"./src/**/*.{ts,tsx,json}\"",
     "format:fix": "yarn format --write",
     "emu:dev": "firebase emulators:start --only auth,functions,firestore --import=./fire-emu-data --export-on-exit",
-    "dev:all": "concurrently -n \"dev,emu:dev\" \"yarn dev\" \"yarn emu:dev\"",
+    "dev:all": "concurrently -n \"dev,emu:dev,functions:dev\" \"yarn dev\" \"yarn emu:dev\" \"yarn --cwd functions build:watch\"",
     "deploy:all": "firebase deploy"
   },
   "dependencies": {

@@ -1,11 +1,18 @@
-import { httpsCallable } from "firebase/functions";
 import { useEffect } from "react";
 
-import { functions } from "~/firebase/initialize";
+import { getHttpsFunctionUrl } from "~/firebase/initialize";
+
+async function healthCheck() {
+  return fetch(getHttpsFunctionUrl("healthCheck"));
+}
 
 export default function Index() {
   useEffect(() => {
-    httpsCallable(functions, "home")().then(console.log).catch(console.error);
+    healthCheck()
+      .then((res) => res.json())
+      .then(console.log)
+      .catch(console.error);
   }, []);
+
   return <div>Index</div>;
 }
