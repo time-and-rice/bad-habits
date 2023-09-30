@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint \"./src/**/*.{js,ts}\"",
+    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "yarn lint --fix",
-    "format": "prettier -l \"./src/**/*.{js,ts,json}\"",
+    "format": "prettier -l \"./src/**/*.{ts,tsx,json}\"",
     "format:fix": "yarn format --write"
   },
   "dependencies": {
