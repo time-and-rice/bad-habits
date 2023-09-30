@@ -22,6 +22,22 @@ export default function Account() {
     }
   }
 
+  async function onResetPassword() {
+    if (
+      !window.confirm("Are you sure to send an email to reset your password?")
+    )
+      return;
+    await sendPasswordResetEmail(auth, authUser.email!);
+    toast.success("Sended.");
+  }
+
+  async function onDeleteAccount() {
+    if (!window.confirm("Are you sure to delete your account?")) return;
+    await tryDeleteAccount();
+    await signOut(auth);
+    toast.success("Good bye.");
+  }
+
   return (
     <div>
       <h1 className="text-center">Account</h1>
@@ -39,19 +55,7 @@ export default function Account() {
 
         <div className="space-y-2">
           <div className="font-semibold">Password</div>
-          <button
-            className="btn normal-case w-full"
-            onClick={async () => {
-              if (
-                !window.confirm(
-                  "Are you sure to send an email to reset your password?",
-                )
-              )
-                return;
-              await sendPasswordResetEmail(auth, authUser.email!);
-              toast.success("Sended.");
-            }}
-          >
+          <button className="btn normal-case w-full" onClick={onResetPassword}>
             Reset password
           </button>
         </div>
@@ -62,13 +66,7 @@ export default function Account() {
           <div className="font-semibold">Caution</div>
           <button
             className="btn btn-error btn-outline normal-case w-full"
-            onClick={async () => {
-              if (!window.confirm("Are you sure to delete your account?"))
-                return;
-              await tryDeleteAccount();
-              await signOut(auth);
-              toast.success("Good bye.");
-            }}
+            onClick={onDeleteAccount}
             disabled={loading}
           >
             Delete account
