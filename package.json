@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "rm -rf dist",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
@@ -13,7 +14,10 @@
     "format:fix": "yarn format --write",
     "emu:dev": "firebase emulators:start --only auth,functions,firestore --import=./fire-emu-data --export-on-exit",
     "dev:all": "concurrently -n \"dev,emu:dev,functions:dev\" \"yarn dev\" \"yarn emu:dev\" \"yarn --cwd functions build:watch\"",
-    "deploy:all": "firebase deploy"
+    "predeploy:hosting": "yarn build",
+    "deploy:hosting": "firebase deploy --only hosting,firestore",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:all": "yarn deploy:hosting && yarn deploy:functions"
   },
   "dependencies": {
     "firebase": "^10.4.0",
