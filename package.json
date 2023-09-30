@@ -10,9 +10,13 @@
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "yarn lint --fix",
     "format": "prettier -l \"./src/**/*.{ts,tsx,json}\"",
-    "format:fix": "yarn format --write"
+    "format:fix": "yarn format --write",
+    "emu:dev": "firebase emulators:start --only auth,functions,firestore --import=./fire-emu-data --export-on-exit",
+    "dev:all": "concurrently -n \"dev,emu:dev\" \"yarn dev\" \"yarn emu:dev\"",
+    "deploy:all": "firebase deploy"
   },
   "dependencies": {
+    "firebase": "^10.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0"
@@ -23,6 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
+    "concurrently": "^8.2.1",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react-hooks": "^4.6.0",

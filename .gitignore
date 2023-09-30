@@ -25,3 +25,5 @@ dist-ssr
 
 # Custom
 !.vscode/settings.json
+.firebase
+fire-emu-data
