@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.app-link {
+  @apply link link-primary font-semibold text-sm;
+}

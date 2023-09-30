@@ -1,3 +1,9 @@
+import { Navigate } from "react-router-dom";
+
+import { useAuthSafely } from "~/providers/auth";
+
 export default function Index() {
-  return <h1>Index</h1>;
+  const { authUser } = useAuthSafely();
+  if (!authUser) return <Navigate to="/auth/log-in" />;
+  return <Navigate to="/me" />;
 }

@@ -1,33 +1,28 @@
 import { Timestamp } from "firebase/firestore";
 
-export type User = {
-  id: string;
+export type UserData = {
   createdAt: Timestamp;
 };
 
-export type BadHabit = {
-  id: string;
+export type BadHabitData = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   userId: string;
 };
 
-export type UrgeRecord = {
-  id: string;
+export type UrgeRecordData = {
   createdAt: Timestamp;
   userId: string;
   badHabitId: string;
 };
 
-export type AlternativeActionRecord = {
-  id: string;
+export type AlternativeActionRecordData = {
   createdAt: Timestamp;
   userId: string;
   badHabitId: string;
 };
 
-export type BadHabitRecord = {
-  id: string;
+export type BadHabitRecordData = {
   createdAt: Timestamp;
   userId: string;
   badHabitId: string;

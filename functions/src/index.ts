@@ -1,4 +1,5 @@
 import "module-alias/register";
 import "./firebase/initialize";
 
-export { healthCheck } from "./handlers/health-check";
+export { deleteAccount } from "./handlers/delete-account";
+export { signUp } from "./handlers/sign-up";
