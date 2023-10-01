@@ -13,7 +13,7 @@ import {
   query,
   Timestamp,
 } from "firebase/firestore";
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
@@ -234,24 +234,30 @@ function BadHabitActionRecords({
       </div>
 
       <Fallback loading={isLoading} error={error as Error | undefined}>
-        {/* Graph */}
-        <div className="w-full ml-[-16px] mr-4" style={{ height: "75vh" }}>
-          <BadHabitActionRecordsGraph
-            endAtDate={endAtDate}
-            badHabitActionRecords={badHabitActionRecords ?? []}
-          />
-        </div>
+        {badHabitActionRecords?.length ? (
+          <Fragment>
+            {/* Graph */}
+            <div className="w-full ml-[-16px] mr-4" style={{ height: "75vh" }}>
+              <BadHabitActionRecordsGraph
+                endAtDate={endAtDate}
+                badHabitActionRecords={badHabitActionRecords ?? []}
+              />
+            </div>
 
-        {/* List */}
-        <div>
-          <div>List</div>
-          {badHabitActionRecords?.map((bhar) => (
-            <BadHabitActionRecordItem
-              key={bhar.id}
-              badHabitActionRecord={bhar}
-            />
-          ))}
-        </div>
+            {/* List */}
+            <div>
+              <div>List</div>
+              {badHabitActionRecords?.map((bhar) => (
+                <BadHabitActionRecordItem
+                  key={bhar.id}
+                  badHabitActionRecord={bhar}
+                />
+              ))}
+            </div>
+          </Fragment>
+        ) : (
+          <div className="font-bold text-center">No Data</div>
+        )}
       </Fallback>
     </div>
   );
@@ -293,9 +299,8 @@ function BadHabitActionRecordsGraph({
   const yTickMin = Math.min(...hours);
   const yTickMax = Math.max(...hours) + hour;
   const yTicks = Array.from({
-    length: (yTickMax / hour - yTickMin / hour + 1) * 2,
+    length: (yTickMax / hour - yTickMin / hour) * 2 + 1,
   }).map((_, i) => yTickMin + (i * hour) / 2);
-  console.log(yTicks, yTickMin / hour, yTickMax / hour);
 
   return (
     <ResponsiveContainer>
