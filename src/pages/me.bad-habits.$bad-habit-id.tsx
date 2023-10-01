@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { subDays } from "date-fns";
-import { format, startOfDay } from "date-fns/esm";
+import { endOfDay, subDays } from "date-fns";
+import {
+  differenceInDays,
+  eachDayOfInterval,
+  format,
+  startOfDay,
+  sub,
+} from "date-fns/esm";
 import {
   addDoc,
   deleteDoc,
@@ -16,6 +22,13 @@ import { useMemo } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
+import {
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  XAxis,
+  YAxis,
+} from "recharts";
 import invariant from "tiny-invariant";
 
 import { DotMenu, MenuItem } from "~/components/app-menu";
@@ -304,6 +317,17 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       </div>
 
       <Fallback loading={loading} error={error as Error | undefined}>
+        {/* Graph */}
+        <div className="w-full h-96 ml-[-16px] mr-4">
+          <RecordsGraph
+            endAtDate={endAtDate}
+            urgeRecords={urgeRecords || []}
+            alternativeActionRecords={alternativeActionRecords || []}
+            badHabitRecords={badHabitRecords || []}
+          />
+        </div>
+
+        {/* List */}
         <div>
           <div>Urge records</div>
           {urgeRecords?.map((ur) => (
@@ -329,6 +353,71 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         </div>
       </Fallback>
     </div>
+  );
+}
+
+function RecordsGraph({
+  endAtDate,
+  urgeRecords,
+  alternativeActionRecords,
+  badHabitRecords,
+}: {
+  endAtDate: Date;
+  urgeRecords: WithId<UrgeRecordData>[];
+  alternativeActionRecords: WithId<AlternativeActionRecordData>[];
+  badHabitRecords: WithId<BadHabitRecordData>[];
+}) {
+  const dateList = eachDayOfInterval({
+    start: endAtDate,
+    end: endOfDay(new Date()),
+  });
+
+  const unixTimeList = dateList.map((d) => d.getTime());
+
+  const data = [
+    ...urgeRecords.map((v) => ({ ...v, type: "urge" })),
+    ...alternativeActionRecords,
+    ...badHabitRecords,
+  ].map((v) => ({
+    ...v,
+    date: startOfDay(v.createdAt.toDate()).getTime(),
+    time:
+      v.createdAt.toDate().getTime() -
+      startOfDay(v.createdAt.toDate()).getTime(),
+  }));
+
+  // console.log(dateList);
+  // console.log(data);
+  console.log(unixTimeList);
+
+  return (
+    <ResponsiveContainer>
+      <ScatterChart margin={{ top: 20, right: 20 }}>
+        <XAxis
+          dataKey="date"
+          tickFormatter={(v) =>
+            new Intl.DateTimeFormat("ja-JP", {
+              day: "2-digit",
+            }).format(new Date(v * 1_000))
+          }
+          ticks={unixTimeList}
+        />
+        <YAxis
+          dataKey="time"
+          tickFormatter={(v) => {
+            v = v / 1000;
+            const h = Math.floor(v / (60 * 60));
+            const m = Math.floor(v % 60);
+            return (
+              h.toString().padStart(2, "0") +
+              ":" +
+              m.toString().padStart(2, "0")
+            );
+          }}
+        />
+        <Scatter data={data} />
+      </ScatterChart>
+    </ResponsiveContainer>
   );
 }
 
