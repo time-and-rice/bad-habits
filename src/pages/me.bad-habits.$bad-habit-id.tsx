@@ -253,7 +253,7 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         <div>
           <div>Urge records</div>
           {urgeRecords?.map((ur) => (
-            <div key={ur.id}>{ur.createdAt.toDate().toISOString()}</div>
+            <div key={ur.id}>{ur.createdAt.toDate().toLocaleString()}</div>
           ))}
         </div>
       </Fallback>
@@ -265,7 +265,7 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         <div>
           <div>Alternative action records</div>
           {alternativeActionRecords?.map((aar) => (
-            <div key={aar.id}>{aar.createdAt.toDate().toISOString()}</div>
+            <div key={aar.id}>{aar.createdAt.toDate().toLocaleString()}</div>
           ))}
         </div>
       </Fallback>
@@ -277,7 +277,7 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         <div>
           <div>Bad habit records</div>
           {badHabitRecords?.map((bhr) => (
-            <div key={bhr.id}>{bhr.createdAt.toDate().toISOString()}</div>
+            <div key={bhr.id}>{bhr.createdAt.toDate().toLocaleString()}</div>
           ))}
         </div>
       </Fallback>
