@@ -42,7 +42,7 @@ export default function LogIn() {
 
   return (
     <div>
-      <h1 className="text-center">Log In</h1>
+      <h1 className="text-center">Log in</h1>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <ErrorOrNull errorMessage={error?.message} />

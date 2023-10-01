@@ -7,8 +7,13 @@ import { auth } from "~/firebase/initialize";
 import { Guard } from "~/hocs/guard";
 
 const MeLayout = Guard("AfterAuth", () => {
+  async function onLogOut() {
+    await signOut(auth);
+    toast.success("Logged out.");
+  }
+
   return (
-    <div>
+    <div className="prose max-w-full">
       <div className="max-w-screen-sm mx-auto">
         <div className="px-4 py-2 flex justify-between items-center">
           <div className="space-x-2">
@@ -24,14 +29,7 @@ const MeLayout = Guard("AfterAuth", () => {
           <div className="mr-[-14px]">
             <BarMenu>
               <MenuItem to="account">Account</MenuItem>
-              <MenuItem
-                onClick={async () => {
-                  await signOut(auth);
-                  toast.success("Logged out.");
-                }}
-              >
-                Log out
-              </MenuItem>
+              <MenuItem onClick={onLogOut}>Log out</MenuItem>
             </BarMenu>
           </div>
         </div>
