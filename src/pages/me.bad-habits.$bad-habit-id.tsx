@@ -1,12 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import classNames from "classnames";
 import { endOfDay, subDays } from "date-fns";
-import {
-  differenceInDays,
-  eachDayOfInterval,
-  format,
-  startOfDay,
-  sub,
-} from "date-fns/esm";
+import { eachDayOfInterval, format, startOfDay } from "date-fns/esm";
 import {
   addDoc,
   deleteDoc,
@@ -23,6 +18,7 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
 import {
+  CartesianGrid,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
@@ -34,16 +30,12 @@ import invariant from "tiny-invariant";
 import { DotMenu, MenuItem } from "~/components/app-menu";
 import { Fallback } from "~/components/fallback";
 import {
-  AlternativeActionRecordData,
-  alternativeActionRecordsRef,
+  BadHabitActionRecordData,
+  badHabitActionRecordsRef,
   BadHabitData,
-  BadHabitRecordData,
-  badHabitRecordsRef,
   badHabitsRef,
   mapDoc,
   mapDocs,
-  UrgeRecordData,
-  urgeRecordsRef,
   WithId,
 } from "~/firebase/firestore";
 import { useAuth } from "~/providers/auth";
@@ -77,10 +69,10 @@ function BadHabitView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       <BadHabitDetail badHabit={badHabit} />
       <div className="divider" />
 
-      <BadHabitRecord badHabit={badHabit} />
+      <BadHabitAction badHabit={badHabit} />
       <div className="divider" />
 
-      <BadHabitRecordsView badHabit={badHabit} />
+      <BadHabitActionRecords badHabit={badHabit} />
       <div className="divider" />
     </div>
   );
@@ -113,13 +105,14 @@ function BadHabitDetail({ badHabit }: { badHabit: WithId<BadHabitData> }) {
   );
 }
 
-function BadHabitRecord({ badHabit }: { badHabit: WithId<BadHabitData> }) {
+function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
   const { authUser } = useAuth();
   const client = useQueryClient();
 
-  const createUrgeRecord = useMutation({
-    mutationFn: async () => {
-      await addDoc(urgeRecordsRef(authUser.uid, badHabit.id), {
+  const createBadHabitRecord = useMutation({
+    mutationFn: async (type: BadHabitActionRecordData["type"]) => {
+      await addDoc(badHabitActionRecordsRef(authUser.uid, badHabit.id), {
+        type,
         createdAt: Timestamp.now(),
         userId: authUser.uid,
         badHabitId: badHabit.id,
@@ -131,62 +124,24 @@ function BadHabitRecord({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         "me",
         "bad-habits",
         badHabit.id,
-        "urge-records",
-      ]);
-    },
-  });
-
-  const createAlternativeActionRecord = useMutation({
-    mutationFn: async () => {
-      await addDoc(alternativeActionRecordsRef(authUser.uid, badHabit.id), {
-        createdAt: Timestamp.now(),
-        userId: authUser.uid,
-        badHabitId: badHabit.id,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Done alternative action.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        badHabit.id,
-        "alternative-action-records",
-      ]);
-    },
-  });
-
-  const createBadHabitRecord = useMutation({
-    mutationFn: async () => {
-      await addDoc(badHabitRecordsRef(authUser.uid, badHabit.id), {
-        createdAt: Timestamp.now(),
-        userId: authUser.uid,
-        badHabitId: badHabit.id,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Done bad habit.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        badHabit.id,
-        "bad-habit-records",
+        "bad-habit-action-records",
       ]);
     },
   });
 
   async function onBad() {
     if (!window.confirm("Are you sure to do bad habit?")) return;
-    await createBadHabitRecord.mutate();
+    await createBadHabitRecord.mutate("bad");
   }
 
   return (
     <div className="space-y-6">
-      <div className="font-bold">Record</div>
+      <div className="font-bold">Action</div>
 
       <div className="flex justify-around">
         <div
           className="flex flex-col items-center"
-          onClick={() => createUrgeRecord.mutate()}
+          onClick={() => createBadHabitRecord.mutate("urge")}
         >
           <button className="btn btn-circle w-20 h-20 btn-warning" />
           <div className="font-semibold">Urge</div>
@@ -195,7 +150,7 @@ function BadHabitRecord({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         <div className="flex flex-col items-center">
           <button
             className="btn btn-circle w-20 h-20 btn-success"
-            onClick={() => createAlternativeActionRecord.mutate()}
+            onClick={() => createBadHabitRecord.mutate("alternative")}
           />
           <div className="font-semibold">Alternative</div>
         </div>
@@ -214,7 +169,11 @@ function BadHabitRecord({ badHabit }: { badHabit: WithId<BadHabitData> }) {
 
 const fmtDate = (d: Date) => format(d, "MM/dd HH:mm");
 
-function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
+function BadHabitActionRecords({
+  badHabit,
+}: {
+  badHabit: WithId<BadHabitData>;
+}) {
   const { authUser } = useAuth();
 
   const [duration, setDuration] = useLocalStorage<
@@ -236,31 +195,14 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
   }, [duration]);
 
   const {
-    data: urgeRecords,
-    isLoading: urgeRecordsLoading,
-    error: urgeRecordsError,
+    data: badHabitActionRecords,
+    isLoading,
+    error,
   } = useQuery({
     queryFn: () => {
       return getDocs(
         query(
-          urgeRecordsRef(authUser.uid, badHabit.id),
-          orderBy("createdAt", "desc"),
-          endAt(endAtDate),
-        ),
-      ).then(mapDocs);
-    },
-    queryKey: ["me", "bad-habits", badHabit.id, "urge-records", endAtDate],
-  });
-
-  const {
-    data: alternativeActionRecords,
-    isLoading: alternativeActionRecordsLoading,
-    error: alternativeActionRecordsError,
-  } = useQuery({
-    queryFn: () => {
-      return getDocs(
-        query(
-          alternativeActionRecordsRef(authUser.uid, badHabit.id),
+          badHabitActionRecordsRef(authUser.uid, badHabit.id),
           orderBy("createdAt", "desc"),
           endAt(endAtDate),
         ),
@@ -270,39 +212,14 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       "me",
       "bad-habits",
       badHabit.id,
-      "alternative-action-records",
+      "bad-habit-action-records",
       endAtDate,
     ],
   });
 
-  const {
-    data: badHabitRecords,
-    isLoading: badHabitRecordsLoading,
-    error: badHabitRecordsError,
-  } = useQuery({
-    queryFn: () => {
-      return getDocs(
-        query(
-          badHabitRecordsRef(authUser.uid, badHabit.id),
-          orderBy("createdAt", "desc"),
-          endAt(endAtDate),
-        ),
-      ).then(mapDocs);
-    },
-    queryKey: ["me", "bad-habits", badHabit.id, "bad-habit-records", endAtDate],
-  });
-
-  const loading =
-    urgeRecordsLoading ||
-    alternativeActionRecordsLoading ||
-    badHabitRecordsLoading;
-
-  const error =
-    urgeRecordsError || alternativeActionRecordsError || badHabitRecordsError;
-
   return (
     <div className="space-y-6">
-      <div className="font-bold">Records view</div>
+      <div className="font-bold">Action records</div>
 
       <div className="space-x-2">
         <button className="app-link" onClick={() => setDuration("THREE_DAYS")}>
@@ -316,39 +233,23 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         </button>
       </div>
 
-      <Fallback loading={loading} error={error as Error | undefined}>
+      <Fallback loading={isLoading} error={error as Error | undefined}>
         {/* Graph */}
-        <div className="w-full h-96 ml-[-16px] mr-4">
-          <RecordsGraph
+        <div className="w-full ml-[-16px] mr-4" style={{ height: "75vh" }}>
+          <BadHabitActionRecordsGraph
             endAtDate={endAtDate}
-            urgeRecords={urgeRecords || []}
-            alternativeActionRecords={alternativeActionRecords || []}
-            badHabitRecords={badHabitRecords || []}
+            badHabitActionRecords={badHabitActionRecords ?? []}
           />
         </div>
 
         {/* List */}
         <div>
-          <div>Urge records</div>
-          {urgeRecords?.map((ur) => (
-            <UrgeRecordItem key={ur.id} urgeRecord={ur} />
-          ))}
-        </div>
-
-        <div>
-          <div>Alternative action records</div>
-          {alternativeActionRecords?.map((aar) => (
-            <AlternativeActionRecordItem
-              key={aar.id}
-              alternativeActionRecord={aar}
+          <div>List</div>
+          {badHabitActionRecords?.map((bhar) => (
+            <BadHabitActionRecordItem
+              key={bhar.id}
+              badHabitActionRecord={bhar}
             />
-          ))}
-        </div>
-
-        <div>
-          <div>Bad habit records</div>
-          {badHabitRecords?.map((bhr) => (
-            <BadHabitRecordItem key={bhr.id} badHabitRecord={bhr} />
           ))}
         </div>
       </Fallback>
@@ -356,29 +257,30 @@ function BadHabitRecordsView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
   );
 }
 
-function RecordsGraph({
+function fmtXTick(n: number) {
+  return format(n, "MM/dd");
+}
+
+function fmtYTick(n: number) {
+  const s = n / 1_000;
+  const h = Math.floor(s / (60 * 60));
+  const m = Math.floor((s - h * 60 * 60) / 60);
+  return `${h}:${m.toString().padStart(2, "0")}`;
+}
+
+function BadHabitActionRecordsGraph({
   endAtDate,
-  urgeRecords,
-  alternativeActionRecords,
-  badHabitRecords,
+  badHabitActionRecords,
 }: {
   endAtDate: Date;
-  urgeRecords: WithId<UrgeRecordData>[];
-  alternativeActionRecords: WithId<AlternativeActionRecordData>[];
-  badHabitRecords: WithId<BadHabitRecordData>[];
+  badHabitActionRecords: WithId<BadHabitActionRecordData>[];
 }) {
   const dateList = eachDayOfInterval({
     start: endAtDate,
     end: endOfDay(new Date()),
-  });
+  }).map((v) => v.getTime());
 
-  const unixTimeList = dateList.map((d) => d.getTime());
-
-  const data = [
-    ...urgeRecords.map((v) => ({ ...v, type: "urge" })),
-    ...alternativeActionRecords,
-    ...badHabitRecords,
-  ].map((v) => ({
+  const data = badHabitActionRecords.map((v) => ({
     ...v,
     date: startOfDay(v.createdAt.toDate()).getTime(),
     time:
@@ -386,45 +288,53 @@ function RecordsGraph({
       startOfDay(v.createdAt.toDate()).getTime(),
   }));
 
-  // console.log(dateList);
-  // console.log(data);
-  console.log(unixTimeList);
+  const hour = 60 * 60 * 1_000;
+  const hours = data.map((v) => Math.floor(v.time / hour) * hour);
+  const yTickMin = Math.min(...hours);
+  const yTickMax = Math.max(...hours) + hour;
+  const yTicks = Array.from({
+    length: (yTickMax / hour - yTickMin / hour + 1) * 2,
+  }).map((_, i) => yTickMin + (i * hour) / 2);
+  console.log(yTicks, yTickMin / hour, yTickMax / hour);
 
   return (
     <ResponsiveContainer>
       <ScatterChart margin={{ top: 20, right: 20 }}>
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis
+          type="number"
           dataKey="date"
-          tickFormatter={(v) =>
-            new Intl.DateTimeFormat("ja-JP", {
-              day: "2-digit",
-            }).format(new Date(v * 1_000))
-          }
-          ticks={unixTimeList}
+          domain={[
+            dateList[0] - 12 * 60 * 60 * 1_000,
+            dateList[dateList.length - 1] + 12 * 60 * 60 * 1_000,
+          ]}
+          ticks={dateList}
+          tickFormatter={fmtXTick}
+          tick={{ fontSize: 12 }}
         />
         <YAxis
+          type="number"
           dataKey="time"
-          tickFormatter={(v) => {
-            v = v / 1000;
-            const h = Math.floor(v / (60 * 60));
-            const m = Math.floor(v % 60);
-            return (
-              h.toString().padStart(2, "0") +
-              ":" +
-              m.toString().padStart(2, "0")
-            );
-          }}
+          domain={[yTickMin, yTickMax]}
+          ticks={yTicks}
+          tickFormatter={fmtYTick}
+          tick={{ fontSize: 12 }}
         />
-        <Scatter data={data} />
+        <Scatter data={data.filter((v) => v.type == "urge")} fill="#fbbd23" />
+        <Scatter
+          data={data.filter((v) => v.type == "alternative")}
+          fill="#36d399"
+        />
+        <Scatter data={data.filter((v) => v.type == "bad")} fill="#f87272" />
       </ScatterChart>
     </ResponsiveContainer>
   );
 }
 
-function UrgeRecordItem({
-  urgeRecord,
+function BadHabitActionRecordItem({
+  badHabitActionRecord,
 }: {
-  urgeRecord: WithId<UrgeRecordData>;
+  badHabitActionRecord: WithId<BadHabitActionRecordData>;
 }) {
   const client = useQueryClient();
 
@@ -432,8 +342,11 @@ function UrgeRecordItem({
     mutationFn: async () => {
       await deleteDoc(
         doc(
-          urgeRecordsRef(urgeRecord.userId, urgeRecord.badHabitId),
-          urgeRecord.id,
+          badHabitActionRecordsRef(
+            badHabitActionRecord.userId,
+            badHabitActionRecord.badHabitId,
+          ),
+          badHabitActionRecord.id,
         ),
       );
     },
@@ -442,8 +355,8 @@ function UrgeRecordItem({
       client.invalidateQueries([
         "me",
         "bad-habits",
-        urgeRecord.badHabitId,
-        "urge-records",
+        badHabitActionRecord.badHabitId,
+        "bad-habit-action-records",
       ]);
     },
   });
@@ -455,94 +368,16 @@ function UrgeRecordItem({
 
   return (
     <div className="flex justify-between">
-      <div>{fmtDate(urgeRecord.createdAt.toDate())}</div>
-      <DotMenu>
-        <MenuItem onClick={onDelete}>Delete</MenuItem>
-      </DotMenu>
-    </div>
-  );
-}
-
-function AlternativeActionRecordItem({
-  alternativeActionRecord,
-}: {
-  alternativeActionRecord: WithId<AlternativeActionRecordData>;
-}) {
-  const client = useQueryClient();
-
-  const deleteAlternativeActionRecord = useMutation({
-    mutationFn: async () => {
-      await deleteDoc(
-        doc(
-          alternativeActionRecordsRef(
-            alternativeActionRecord.userId,
-            alternativeActionRecord.badHabitId,
-          ),
-          alternativeActionRecord.id,
-        ),
-      );
-    },
-    onSuccess: () => {
-      toast.success("Deleted.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        alternativeActionRecord.badHabitId,
-        "alternative-action-records",
-      ]);
-    },
-  });
-
-  async function onDelete() {
-    if (!window.confirm("Are you sure to delete?")) return;
-    await deleteAlternativeActionRecord.mutate();
-  }
-
-  return (
-    <div className="flex justify-between">
-      <div>{fmtDate(alternativeActionRecord.createdAt.toDate())}</div>
-      <DotMenu>
-        <MenuItem onClick={onDelete}>Delete</MenuItem>
-      </DotMenu>
-    </div>
-  );
-}
-
-function BadHabitRecordItem({
-  badHabitRecord,
-}: {
-  badHabitRecord: WithId<BadHabitRecordData>;
-}) {
-  const client = useQueryClient();
-
-  const deleteBadHabitRecord = useMutation({
-    mutationFn: async () => {
-      await deleteDoc(
-        doc(
-          badHabitRecordsRef(badHabitRecord.userId, badHabitRecord.badHabitId),
-          badHabitRecord.id,
-        ),
-      );
-    },
-    onSuccess: () => {
-      toast.success("Deleted.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        badHabitRecord.badHabitId,
-        "bad-habit-records",
-      ]);
-    },
-  });
-
-  async function onDelete() {
-    if (!window.confirm("Are you sure to delete?")) return;
-    await deleteBadHabitRecord.mutate();
-  }
-
-  return (
-    <div className="flex justify-between">
-      <div>{fmtDate(badHabitRecord.createdAt.toDate())}</div>
+      <div className="flex items-center space-x-2">
+        <div
+          className={classNames("badge badge-sm", {
+            "badge-warning": badHabitActionRecord.type == "urge",
+            "badge-success": badHabitActionRecord.type == "alternative",
+            "badge-error": badHabitActionRecord.type == "bad",
+          })}
+        />
+        <div>{fmtDate(badHabitActionRecord.createdAt.toDate())}</div>
+      </div>
       <DotMenu>
         <MenuItem onClick={onDelete}>Delete</MenuItem>
       </DotMenu>

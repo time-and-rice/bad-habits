@@ -11,9 +11,7 @@ import { db } from "./initialize";
 /**
  * /users
  * /users/userId/batHabits
- * /users/userId/batHabits/badHabitId/urgeRecords
- * /users/userId/batHabits/badHabitId/alternativeActionRecords
- * /users/userId/batHabits/badHabitId/badHabitRecords
+ * /users/userId/batHabits/badHabitId/badHabitActionRecords
  */
 
 /**
@@ -37,19 +35,8 @@ export type BadHabitData = {
   userId: string;
 };
 
-export type UrgeRecordData = {
-  createdAt: Timestamp;
-  userId: string;
-  badHabitId: string;
-};
-
-export type AlternativeActionRecordData = {
-  createdAt: Timestamp;
-  userId: string;
-  badHabitId: string;
-};
-
-export type BadHabitRecordData = {
+export type BadHabitActionRecordData = {
+  type: "urge" | "alternative" | "bad";
   createdAt: Timestamp;
   userId: string;
   badHabitId: string;
@@ -69,29 +56,12 @@ export const badHabitsRef = (userId: string) =>
     "badHabits",
   ) as CollectionReference<BadHabitData>;
 
-export const urgeRecordsRef = (userId: string, badHabitId: string) =>
+export const badHabitActionRecordsRef = (userId: string, badHabitId: string) =>
   collection(
     badHabitsRef(userId),
     badHabitId,
-    "urgeRecords",
-  ) as CollectionReference<UrgeRecordData>;
-
-export const alternativeActionRecordsRef = (
-  userId: string,
-  badHabitId: string,
-) =>
-  collection(
-    badHabitsRef(userId),
-    badHabitId,
-    "alternativeActionRecords",
-  ) as CollectionReference<AlternativeActionRecordData>;
-
-export const badHabitRecordsRef = (userId: string, badHabitId: string) =>
-  collection(
-    badHabitsRef(userId),
-    badHabitId,
-    "badHabitRecords",
-  ) as CollectionReference<BadHabitRecordData>;
+    "batHabitActionRecords",
+  ) as CollectionReference<BadHabitActionRecordData>;
 
 /**
  * Utils
