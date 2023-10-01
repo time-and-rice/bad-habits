@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { sendPasswordResetEmail, signOut } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
 import toast from "react-hot-toast";
@@ -10,6 +11,7 @@ const deleteAccount = httpsCallable(functions, "deleteAccount");
 
 export default function Account() {
   const { authUser } = useAuth();
+  const client = useQueryClient();
 
   const { loading, setLoading } = useTryState();
 
@@ -34,6 +36,7 @@ export default function Account() {
   async function onDeleteAccount() {
     if (!window.confirm("Are you sure to delete your account?")) return;
     await tryDeleteAccount();
+    client.clear();
     await signOut(auth);
     toast.success("Good bye.");
   }

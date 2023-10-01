@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { Link, Outlet } from "react-router-dom";
@@ -7,8 +8,12 @@ import { auth } from "~/firebase/initialize";
 import { Guard } from "~/hocs/guard";
 
 const MeLayout = Guard("AfterAuth", () => {
+  const client = useQueryClient();
+
   async function onLogOut() {
+    client.clear();
     await signOut(auth);
+
     toast.success("Logged out.");
   }
 

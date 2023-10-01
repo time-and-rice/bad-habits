@@ -1,5 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDoc, Timestamp } from "firebase/firestore";
+import { get } from "lodash-es";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +14,6 @@ import {
   TextareaAutosizeField,
 } from "~/components/form";
 import { badHabitsRef } from "~/firebase/firestore";
-import { useTryState } from "~/hooks/use-try-state";
 import { useAuth } from "~/providers/auth";
 
 const BadHabitsCreateFormSchema = z.object({
@@ -20,16 +21,46 @@ const BadHabitsCreateFormSchema = z.object({
   description: z.string().trim(),
   pros: z.string().trim().min(1),
   cons: z.string().trim().min(1),
-  alternativeActions: z.string().trim().min(1),
+  alternativeActions: z
+    .string()
+    .trim()
+    .min(1)
+    .transform((v) => v.split("\n")),
 });
 
 type BadHabitsCreateFormSchema = z.infer<typeof BadHabitsCreateFormSchema>;
 
 export default function BadHabitsNew() {
   const { authUser } = useAuth();
+  const client = useQueryClient();
   const navigate = useNavigate();
 
-  const { loading, setLoading, error, setError } = useTryState();
+  const createBadHabit = useMutation({
+    mutationFn: async ({
+      name,
+      description,
+      pros,
+      cons,
+      alternativeActions,
+    }: BadHabitsCreateFormSchema) => {
+      const now = Timestamp.now();
+      await addDoc(badHabitsRef(authUser.uid), {
+        name,
+        description,
+        pros,
+        cons,
+        alternativeActions,
+        createdAt: now,
+        updatedAt: now,
+        userId: authUser.uid,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Created.");
+      client.invalidateQueries(["me", "bad-habits"]);
+      navigate("/me/bad-habits");
+    },
+  });
 
   const {
     handleSubmit,
@@ -39,70 +70,47 @@ export default function BadHabitsNew() {
     resolver: zodResolver(BadHabitsCreateFormSchema),
   });
 
-  async function onSubmit({
-    name,
-    description,
-    pros,
-    cons,
-    alternativeActions,
-  }: BadHabitsCreateFormSchema) {
-    try {
-      setLoading(true);
-      const now = Timestamp.now();
-      await addDoc(badHabitsRef(authUser.uid), {
-        name,
-        description,
-        pros,
-        cons,
-        alternativeActions: alternativeActions.split("\n"),
-        createdAt: now,
-        updatedAt: now,
-        userId: authUser.uid,
-      });
-      toast.success("Created.");
-      navigate("/me/bad-habits");
-    } catch (e) {
-      setError(e as Error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div>
       <h1 className="text-center">New Bad Habit</h1>
 
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="space-y-4"
+        onSubmit={handleSubmit((v) => createBadHabit.mutate(v))}
+      >
         <ErrorOrNull errorMessage={getFieldErrorMessages(fieldErrors)} />
-        <ErrorOrNull errorMessage={error?.message} />
+        <ErrorOrNull errorMessage={get(createBadHabit, "error.message")} />
 
         <InputField label="Name" required register={register("name")} />
         <TextareaAutosizeField
           label="Description"
-          minRows={3}
-          required
+          minRows={2}
           register={register("description")}
         />
         <TextareaAutosizeField
           label="Pros"
-          minRows={3}
+          minRows={2}
           required
           register={register("pros")}
         />
         <TextareaAutosizeField
           label="Cons"
-          minRows={3}
+          minRows={2}
           required
           register={register("cons")}
         />
         <TextareaAutosizeField
           label="Alternative actions"
-          minRows={3}
+          minRows={2}
           required
           register={register("alternativeActions")}
         />
 
-        <button type="submit" className="btn w-full" disabled={loading}>
+        <button
+          type="submit"
+          className="btn w-full"
+          disabled={createBadHabit.isLoading}
+        >
           Submit
         </button>
       </form>

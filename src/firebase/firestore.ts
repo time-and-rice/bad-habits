@@ -1,4 +1,9 @@
-import { collection, CollectionReference } from "firebase/firestore";
+import {
+  collection,
+  CollectionReference,
+  DocumentSnapshot,
+  QuerySnapshot,
+} from "firebase/firestore";
 
 import { db } from "./initialize";
 import {
@@ -50,3 +55,16 @@ export const badHabitRecordsRef = (userId: string, badHabitId: string) =>
     badHabitId,
     "badHabitRecords",
   ) as CollectionReference<BadHabitRecordData>;
+
+/**
+ * Utils
+ */
+
+export function mapDoc<T>(snap: DocumentSnapshot<T>) {
+  if (snap.exists()) return { id: snap.id, ...snap.data() };
+  return undefined;
+}
+
+export function mapDocs<T>(snap: QuerySnapshot<T>) {
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
