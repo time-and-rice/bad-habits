@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { Fragment, useMemo } from "react";
 import toast from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
 import {
   CartesianGrid,
@@ -100,6 +100,12 @@ function BadHabitDetail({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       <div>
         <div className="font-semibold">Alternative actions</div>
         <div className="whitespace-pre-wrap">{badHabit.alternativeActions}</div>
+      </div>
+
+      <div className="text-right">
+        <Link to="edit" className="app-link">
+          Edit
+        </Link>
       </div>
     </div>
   );
