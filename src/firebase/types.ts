@@ -11,7 +11,7 @@ export type BadHabitData = {
   description: string;
   pros: string;
   cons: string;
-  alternativeActions: string[];
+  alternativeActions: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   userId: string;

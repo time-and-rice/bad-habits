@@ -45,7 +45,7 @@ export default function BadHabitsNew() {
         description,
         pros,
         cons,
-        alternativeActions: alternativeActions.split("\n"),
+        alternativeActions,
         createdAt: now,
         updatedAt: now,
         userId: authUser.uid,

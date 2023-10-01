@@ -91,7 +91,7 @@ function BadHabitUpdateForm({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       description: badHabit.description,
       pros: badHabit.pros,
       cons: badHabit.cons,
-      alternativeActions: badHabit.alternativeActions.join("\n"),
+      alternativeActions: badHabit.alternativeActions,
     },
   });
 
