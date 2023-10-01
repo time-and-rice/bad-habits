@@ -43,7 +43,7 @@ export function InputField({ label, register, ...rest }: InputFieldProps) {
 }
 
 /**
- * TextareaField
+ * TextareaAutosizeField
  */
 
 type TextareaAutosizeFieldProps = TextareaAutosizeProps & {

@@ -58,8 +58,8 @@ export default function SignUp() {
       <h1 className="text-center">Sign up</h1>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <ErrorOrNull errorMessage={error?.message} />
         <ErrorOrNull errorMessage={getFieldErrorMessages(fieldErrors)} />
+        <ErrorOrNull errorMessage={error?.message} />
 
         <InputField label="Email" type="email" register={register("email")} />
         <InputField

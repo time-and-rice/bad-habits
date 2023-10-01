@@ -17,12 +17,8 @@ const MeLayout = Guard("AfterAuth", () => {
       <div className="max-w-screen-sm mx-auto">
         <div className="px-4 py-2 flex justify-between items-center">
           <div className="space-x-2">
-            <Link to="/" className="app-link">
-              Index
-            </Link>
-
-            <Link to="/" className="app-link">
-              Index
+            <Link to="bad-habits" className="app-link">
+              Bad habits
             </Link>
           </div>
 

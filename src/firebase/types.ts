@@ -5,6 +5,11 @@ export type UserData = {
 };
 
 export type BadHabitData = {
+  name: string;
+  description: string;
+  pros: string;
+  cons: string;
+  alternativeActions: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
   userId: string;
