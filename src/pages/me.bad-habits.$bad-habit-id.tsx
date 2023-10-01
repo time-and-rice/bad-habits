@@ -105,7 +105,7 @@ function BadHabitRecord({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       });
     },
     onSuccess: () => {
-      toast.success("Done urged.");
+      toast.success("Done urge.");
       client.invalidateQueries([
         "me",
         "bad-habits",

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
+import { getDocs, orderBy, query } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { Fragment } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
@@ -7,6 +8,7 @@ import { Link } from "react-router-dom";
 import { DotMenu, MenuItem } from "~/components/app-menu";
 import { Fallback } from "~/components/fallback";
 import { badHabitsRef, mapDocs } from "~/firebase/firestore";
+import { functions } from "~/firebase/initialize";
 import { useAuth } from "~/providers/auth";
 
 export default function BadHabits() {
@@ -27,8 +29,8 @@ export default function BadHabits() {
   });
 
   const deleteBadHabit = useMutation({
-    mutationFn: async (id: string) => {
-      await deleteDoc(doc(badHabitsRef(authUser.uid), id));
+    mutationFn: async (badHabitId: string) => {
+      await httpsCallable(functions, "deleteBadHabit")({ badHabitId });
     },
     onSuccess: () => {
       client.invalidateQueries(["me", "bad-habits"]);
