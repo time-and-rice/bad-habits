@@ -1,5 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
+export type WithId<T> = T & { id: string };
+
 export type UserData = {
   createdAt: Timestamp;
 };

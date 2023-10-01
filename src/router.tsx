@@ -8,6 +8,7 @@ import SignUp from "./pages/auth.sign-up";
 import MeLayout from "./pages/me";
 import Account from "./pages/me.account";
 import BadHabits from "./pages/me.bad-habits";
+import BadHabitEdit from "./pages/me.bad-habits.$bad-habit-id.edit";
 import BadHabitsNew from "./pages/me.bad-habits.new";
 
 export const router = createBrowserRouter([
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
       {
         path: "bad-habits/new",
         element: <BadHabitsNew />,
+      },
+      {
+        path: "bad-habits/:badHabitId/edit",
+        element: <BadHabitEdit />,
       },
     ],
   },

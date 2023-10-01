@@ -21,11 +21,7 @@ const BadHabitsCreateFormSchema = z.object({
   description: z.string().trim(),
   pros: z.string().trim().min(1),
   cons: z.string().trim().min(1),
-  alternativeActions: z
-    .string()
-    .trim()
-    .min(1)
-    .transform((v) => v.split("\n")),
+  alternativeActions: z.string().trim().min(1),
 });
 
 type BadHabitsCreateFormSchema = z.infer<typeof BadHabitsCreateFormSchema>;
@@ -44,21 +40,21 @@ export default function BadHabitsNew() {
       alternativeActions,
     }: BadHabitsCreateFormSchema) => {
       const now = Timestamp.now();
-      await addDoc(badHabitsRef(authUser.uid), {
+      return await addDoc(badHabitsRef(authUser.uid), {
         name,
         description,
         pros,
         cons,
-        alternativeActions,
+        alternativeActions: alternativeActions.split("\n"),
         createdAt: now,
         updatedAt: now,
         userId: authUser.uid,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Created.");
       client.invalidateQueries(["me", "bad-habits"]);
-      navigate("/me/bad-habits");
+      navigate(`/me/bad-habits/${data.id}`);
     },
   });
 

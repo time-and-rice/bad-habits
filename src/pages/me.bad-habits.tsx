@@ -65,7 +65,7 @@ export default function BadHabits() {
             ))}
           </div>
         ) : (
-          <div className="text-center font-bold">No Data</div>
+          <div className="font-bold text-center">No Data</div>
         )}
       </div>
     </div>
