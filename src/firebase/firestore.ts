@@ -3,16 +3,10 @@ import {
   CollectionReference,
   DocumentSnapshot,
   QuerySnapshot,
+  Timestamp,
 } from "firebase/firestore";
 
 import { db } from "./initialize";
-import {
-  AlternativeActionRecordData,
-  BadHabitData,
-  BadHabitRecordData,
-  UrgeRecordData,
-  UserData,
-} from "./types";
 
 /**
  * /users
@@ -20,6 +14,49 @@ import {
  * /users/userId/batHabits/badHabitId/urgeRecords
  * /users/userId/batHabits/badHabitId/alternativeActionRecords
  * /users/userId/batHabits/badHabitId/badHabitRecords
+ */
+
+/**
+ * Types
+ */
+
+export type WithId<T> = T & { id: string };
+
+export type UserData = {
+  createdAt: Timestamp;
+};
+
+export type BadHabitData = {
+  name: string;
+  description: string;
+  pros: string;
+  cons: string;
+  alternativeActions: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  userId: string;
+};
+
+export type UrgeRecordData = {
+  createdAt: Timestamp;
+  userId: string;
+  badHabitId: string;
+};
+
+export type AlternativeActionRecordData = {
+  createdAt: Timestamp;
+  userId: string;
+  badHabitId: string;
+};
+
+export type BadHabitRecordData = {
+  createdAt: Timestamp;
+  userId: string;
+  badHabitId: string;
+};
+
+/**
+ * Collections
  */
 
 export const usersRef = () =>
@@ -46,7 +83,7 @@ export const alternativeActionRecordsRef = (
   collection(
     badHabitsRef(userId),
     badHabitId,
-    "alternativeRecords",
+    "alternativeActionRecords",
   ) as CollectionReference<AlternativeActionRecordData>;
 
 export const badHabitRecordsRef = (userId: string, badHabitId: string) =>

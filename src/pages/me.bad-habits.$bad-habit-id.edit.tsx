@@ -14,8 +14,12 @@ import {
   InputField,
   TextareaAutosizeField,
 } from "~/components/form";
-import { badHabitsRef, mapDoc } from "~/firebase/firestore";
-import { BadHabitData, WithId } from "~/firebase/types";
+import {
+  BadHabitData,
+  badHabitsRef,
+  mapDoc,
+  WithId,
+} from "~/firebase/firestore";
 import { useAuth } from "~/providers/auth";
 
 export default function BadHabitEdit() {
@@ -69,14 +73,14 @@ function BadHabitUpdateForm({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         description,
         pros,
         cons,
-        alternativeActions: alternativeActions.split("\n"),
+        alternativeActions,
         updatedAt: Timestamp.now(),
       });
     },
     onSuccess: () => {
       toast.success("Updated.");
       client.invalidateQueries(["me", "bad-habits"]);
-      navigate(`/me/bad-habit/${badHabit.id}`);
+      navigate(`/me/bad-habits/${badHabit.id}`);
     },
   });
 
