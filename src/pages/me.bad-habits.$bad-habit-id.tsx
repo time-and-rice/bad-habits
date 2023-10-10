@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import classNames from "classnames";
 import { endOfDay, subDays } from "date-fns";
@@ -13,7 +14,15 @@ import {
   query,
   Timestamp,
 } from "firebase/firestore";
-import { Fragment, useMemo } from "react";
+import {
+  forwardRef,
+  Fragment,
+  PropsWithChildren,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
@@ -26,9 +35,12 @@ import {
   YAxis,
 } from "recharts";
 import invariant from "tiny-invariant";
+import { z } from "zod";
 
 import { DotMenu, MenuItem } from "~/components/app-menu";
+import { ErrorOrNull } from "~/components/error";
 import { Fallback } from "~/components/fallback";
+import { getFieldErrorMessages, InputField } from "~/components/form";
 import {
   BadHabitActionRecordData,
   badHabitActionRecordsRef,
@@ -38,6 +50,7 @@ import {
   mapDocs,
   WithId,
 } from "~/firebase/firestore";
+import { DateTimeFormat, genDate } from "~/lib/date";
 import { useAuth } from "~/providers/auth";
 
 export default function BadHabit() {
@@ -112,32 +125,26 @@ function BadHabitDetail({ badHabit }: { badHabit: WithId<BadHabitData> }) {
 }
 
 function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
-  const { authUser } = useAuth();
-  const client = useQueryClient();
+  const [actionType, setActionType] =
+    useState<BadHabitActionRecordData["type"]>("urge");
 
-  const createBadHabitRecord = useMutation({
-    mutationFn: async (type: BadHabitActionRecordData["type"]) => {
-      await addDoc(badHabitActionRecordsRef(authUser.uid, badHabit.id), {
-        type,
-        createdAt: Timestamp.now(),
-        userId: authUser.uid,
-        badHabitId: badHabit.id,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Done urge.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        badHabit.id,
-        "bad-habit-action-records",
-      ]);
-    },
-  });
+  const modalRef = useRef<HTMLDialogElement>(null);
 
-  async function onBad() {
-    if (!window.confirm("Are you sure to do bad habit?")) return;
-    await createBadHabitRecord.mutate("bad");
+  function onUrge() {
+    setActionType("urge");
+    modalRef.current?.showModal();
+  }
+  function onAlternative() {
+    setActionType("alternative");
+    modalRef.current?.showModal();
+  }
+  function onBad() {
+    setActionType("bad");
+    modalRef.current?.showModal();
+  }
+
+  function onClose() {
+    modalRef.current?.close();
   }
 
   return (
@@ -145,10 +152,7 @@ function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       <div className="font-bold">Action</div>
 
       <div className="flex justify-around">
-        <div
-          className="flex flex-col items-center"
-          onClick={() => createBadHabitRecord.mutate("urge")}
-        >
+        <div className="flex flex-col items-center" onClick={onUrge}>
           <button className="btn btn-circle w-20 h-20 btn-warning" />
           <div className="font-semibold">Urge</div>
         </div>
@@ -156,7 +160,7 @@ function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         <div className="flex flex-col items-center">
           <button
             className="btn btn-circle w-20 h-20 btn-success"
-            onClick={() => createBadHabitRecord.mutate("alternative")}
+            onClick={onAlternative}
           />
           <div className="font-semibold">Alternative</div>
         </div>
@@ -169,6 +173,13 @@ function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
           <div className="font-semibold">Bad</div>
         </div>
       </div>
+
+      <BadHabitActionRecordCreateFormModal
+        ref={modalRef}
+        badHabit={badHabit}
+        actionType={actionType}
+        onSubmit={onClose}
+      />
     </div>
   );
 }
@@ -277,7 +288,9 @@ function fmtYTick(n: number) {
   const s = n / 1_000;
   const h = Math.floor(s / (60 * 60));
   const m = Math.floor((s - h * 60 * 60) / 60);
-  return `${h}:${m.toString().padStart(2, "0")}`;
+  const hStr = h.toString().padStart(2, "0");
+  const mStr = m.toString().padStart(2, "0");
+  return `${hStr}:${mStr}`;
 }
 
 function BadHabitActionRecordsGraph({
@@ -395,3 +408,102 @@ function BadHabitActionRecordItem({
     </div>
   );
 }
+
+const Modal = forwardRef<HTMLDialogElement, PropsWithChildren>((props, ref) => {
+  return (
+    <dialog ref={ref} className="modal" id="xxx">
+      <div className="modal-box">
+        <form method="dialog">
+          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            X
+          </button>
+        </form>
+        {props.children}
+      </div>
+      <form method="dialog" className="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
+  );
+});
+
+const BadHabitActionRecordCreateFormSchema = z.object({
+  createdAt: z.string(),
+});
+
+type BadHabitActionRecordCreateFormSchema = z.infer<
+  typeof BadHabitActionRecordCreateFormSchema
+>;
+
+const BadHabitActionRecordCreateFormModal = forwardRef<
+  HTMLDialogElement,
+  {
+    badHabit: WithId<BadHabitData>;
+    actionType: BadHabitActionRecordData["type"];
+    // defaultValue を取らせるか？
+    onSubmit: () => void;
+  }
+>(({ badHabit, actionType, onSubmit }, ref) => {
+  const { authUser } = useAuth();
+  const client = useQueryClient();
+
+  const createBadHabitRecord = useMutation({
+    mutationFn: async ({ createdAt }: BadHabitActionRecordCreateFormSchema) => {
+      return await addDoc(badHabitActionRecordsRef(authUser.uid, badHabit.id), {
+        type: actionType,
+        createdAt: Timestamp.fromDate(new Date(createdAt)),
+        userId: authUser.uid,
+        badHabitId: badHabit.id,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Created.");
+      client.invalidateQueries([
+        "me",
+        "bad-habits",
+        badHabit.id,
+        "bad-habit-action-records",
+      ]);
+    },
+  });
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors: fieldErrors },
+  } = useForm<BadHabitActionRecordCreateFormSchema>({
+    resolver: zodResolver(BadHabitActionRecordCreateFormSchema),
+    defaultValues: {
+      createdAt: DateTimeFormat(genDate()),
+    },
+  });
+
+  async function thisOnSubmit(v: BadHabitActionRecordCreateFormSchema) {
+    await createBadHabitRecord.mutate(v);
+    onSubmit();
+  }
+
+  return (
+    <Modal ref={ref}>
+      <div>
+        <h2 className="text-center">New Bad Habit Action Record</h2>
+
+        <form className="space-y-4" onSubmit={handleSubmit(thisOnSubmit)}>
+          <ErrorOrNull errorMessage={getFieldErrorMessages(fieldErrors)} />
+
+          <InputField
+            label="Created at"
+            type="datetime-local"
+            register={register("createdAt")}
+          />
+
+          <div className="space-x-4">
+            <button type="submit" className="btn">
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
+  );
+});
