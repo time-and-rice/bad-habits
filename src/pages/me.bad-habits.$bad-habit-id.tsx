@@ -14,6 +14,7 @@ import {
   query,
   Timestamp,
 } from "firebase/firestore";
+import { capitalize } from "lodash-es";
 import {
   forwardRef,
   Fragment,
@@ -409,9 +410,10 @@ function BadHabitActionRecordItem({
   );
 }
 
+// TODO: forwardRef やめたい。isOpen の props のみで制御できそう？
 const Modal = forwardRef<HTMLDialogElement, PropsWithChildren>((props, ref) => {
   return (
-    <dialog ref={ref} className="modal" id="xxx">
+    <dialog ref={ref} className="modal">
       <div className="modal-box">
         <form method="dialog">
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
@@ -440,7 +442,6 @@ const BadHabitActionRecordCreateFormModal = forwardRef<
   {
     badHabit: WithId<BadHabitData>;
     actionType: BadHabitActionRecordData["type"];
-    // defaultValue を取らせるか？
     onSubmit: () => void;
   }
 >(({ badHabit, actionType, onSubmit }, ref) => {
@@ -473,6 +474,7 @@ const BadHabitActionRecordCreateFormModal = forwardRef<
     formState: { errors: fieldErrors },
   } = useForm<BadHabitActionRecordCreateFormSchema>({
     resolver: zodResolver(BadHabitActionRecordCreateFormSchema),
+    // TODO: isOpen が true になったタイミングで createdAt を更新したい
     defaultValues: {
       createdAt: DateTimeFormat(genDate()),
     },
@@ -486,7 +488,9 @@ const BadHabitActionRecordCreateFormModal = forwardRef<
   return (
     <Modal ref={ref}>
       <div>
-        <h2 className="text-center">New Bad Habit Action Record</h2>
+        <h2 className="text-center">{`${capitalize(
+          actionType,
+        )} action record`}</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit(thisOnSubmit)}>
           <ErrorOrNull errorMessage={getFieldErrorMessages(fieldErrors)} />
@@ -497,11 +501,9 @@ const BadHabitActionRecordCreateFormModal = forwardRef<
             register={register("createdAt")}
           />
 
-          <div className="space-x-4">
-            <button type="submit" className="btn">
-              Submit
-            </button>
-          </div>
+          <button type="submit" className="btn block ml-auto">
+            Submit
+          </button>
         </form>
       </div>
     </Modal>
