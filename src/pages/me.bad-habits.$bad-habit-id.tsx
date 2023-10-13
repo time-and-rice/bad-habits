@@ -15,14 +15,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { capitalize } from "lodash-es";
-import {
-  forwardRef,
-  Fragment,
-  PropsWithChildren,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
@@ -39,6 +32,7 @@ import invariant from "tiny-invariant";
 import { z } from "zod";
 
 import { DotMenu, MenuItem } from "~/components/app-menu";
+import { AppModal } from "~/components/app-modal";
 import { ErrorOrNull } from "~/components/error";
 import { Fallback } from "~/components/fallback";
 import { getFieldErrorMessages, InputField } from "~/components/form";
@@ -126,26 +120,28 @@ function BadHabitDetail({ badHabit }: { badHabit: WithId<BadHabitData> }) {
 }
 
 function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
+  const [modalShow, setModalShow] = useState(false);
   const [actionType, setActionType] =
     useState<BadHabitActionRecordData["type"]>("urge");
 
-  const modalRef = useRef<HTMLDialogElement>(null);
+  function onOpen() {
+    setModalShow(true);
+  }
+  function onClose() {
+    setModalShow(false);
+  }
 
   function onUrge() {
     setActionType("urge");
-    modalRef.current?.showModal();
+    onOpen();
   }
   function onAlternative() {
     setActionType("alternative");
-    modalRef.current?.showModal();
+    onOpen();
   }
   function onBad() {
     setActionType("bad");
-    modalRef.current?.showModal();
-  }
-
-  function onClose() {
-    modalRef.current?.close();
+    onOpen();
   }
 
   return (
@@ -176,10 +172,10 @@ function BadHabitAction({ badHabit }: { badHabit: WithId<BadHabitData> }) {
       </div>
 
       <BadHabitActionRecordCreateFormModal
-        ref={modalRef}
         badHabit={badHabit}
         actionType={actionType}
-        onSubmit={onClose}
+        show={modalShow}
+        onClose={onClose}
       />
     </div>
   );
@@ -410,25 +406,6 @@ function BadHabitActionRecordItem({
   );
 }
 
-// TODO: forwardRef やめたい。isOpen の props のみで制御できそう？
-const Modal = forwardRef<HTMLDialogElement, PropsWithChildren>((props, ref) => {
-  return (
-    <dialog ref={ref} className="modal">
-      <div className="modal-box">
-        <form method="dialog">
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-            X
-          </button>
-        </form>
-        {props.children}
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
-  );
-});
-
 const BadHabitActionRecordCreateFormSchema = z.object({
   createdAt: z.string(),
 });
@@ -437,14 +414,17 @@ type BadHabitActionRecordCreateFormSchema = z.infer<
   typeof BadHabitActionRecordCreateFormSchema
 >;
 
-const BadHabitActionRecordCreateFormModal = forwardRef<
-  HTMLDialogElement,
-  {
-    badHabit: WithId<BadHabitData>;
-    actionType: BadHabitActionRecordData["type"];
-    onSubmit: () => void;
-  }
->(({ badHabit, actionType, onSubmit }, ref) => {
+function BadHabitActionRecordCreateFormModal({
+  badHabit,
+  actionType,
+  show,
+  onClose,
+}: {
+  badHabit: WithId<BadHabitData>;
+  actionType: BadHabitActionRecordData["type"];
+  show: boolean;
+  onClose: () => void;
+}) {
   const { authUser } = useAuth();
   const client = useQueryClient();
 
@@ -472,21 +452,22 @@ const BadHabitActionRecordCreateFormModal = forwardRef<
     handleSubmit,
     register,
     formState: { errors: fieldErrors },
+    setValue,
   } = useForm<BadHabitActionRecordCreateFormSchema>({
     resolver: zodResolver(BadHabitActionRecordCreateFormSchema),
-    // TODO: isOpen が true になったタイミングで createdAt を更新したい
-    defaultValues: {
-      createdAt: DateTimeFormat(genDate()),
-    },
   });
+
+  useEffect(() => {
+    if (show) setValue("createdAt", DateTimeFormat(genDate()));
+  }, [setValue, show]);
 
   async function thisOnSubmit(v: BadHabitActionRecordCreateFormSchema) {
     await createBadHabitRecord.mutate(v);
-    onSubmit();
+    onClose();
   }
 
   return (
-    <Modal ref={ref}>
+    <AppModal show={show} onClose={onClose}>
       <div>
         <h2 className="text-center">{`${capitalize(
           actionType,
@@ -506,6 +487,6 @@ const BadHabitActionRecordCreateFormModal = forwardRef<
           </button>
         </form>
       </div>
-    </Modal>
+    </AppModal>
   );
-});
+}
