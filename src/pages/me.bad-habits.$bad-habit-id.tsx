@@ -282,7 +282,7 @@ function BadHabitActionRecords({
 }
 
 function fmtXTick(n: number) {
-  return format(n, "MM/dd");
+  return format(n, "do");
 }
 
 function fmtYTick(n: number) {
@@ -319,8 +319,8 @@ function BadHabitActionRecordsGraph({
   const yTickMin = Math.min(...hours);
   const yTickMax = Math.max(...hours) + hour;
   const yTicks = Array.from({
-    length: (yTickMax / hour - yTickMin / hour) * 2 + 1,
-  }).map((_, i) => yTickMin + (i * hour) / 2);
+    length: yTickMax / hour - yTickMin / hour + 1,
+  }).map((_, i) => yTickMin + i * hour);
 
   return (
     <ResponsiveContainer>
