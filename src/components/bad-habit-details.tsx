@@ -10,7 +10,10 @@ export function BadHabitDetails({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
-  const [open, setOpen] = useLocalStorage("BH.bad-habit.details.open", true);
+  const [open, setOpen] = useLocalStorage(
+    `BH.bad-habit.${badHabit.id}.details.open`,
+    true,
+  );
 
   return (
     <div className="space-y-4">

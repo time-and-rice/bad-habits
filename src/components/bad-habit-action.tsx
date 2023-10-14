@@ -27,7 +27,10 @@ export function BadHabitAction({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
-  const [open, setOpen] = useLocalStorage("BH.bad-habit.action.open", true);
+  const [open, setOpen] = useLocalStorage(
+    `BH.bad-habit.${badHabit.id}.action.open`,
+    true,
+  );
 
   const [modalShow, setModalShow] = useState(false);
   const [actionType, setActionType] =

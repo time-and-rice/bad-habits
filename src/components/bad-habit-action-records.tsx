@@ -50,7 +50,7 @@ export function BadHabitActionRecords({
   const { authUser } = useAuth();
 
   const [open, setOpen] = useLocalStorage(
-    "BH.bad-habit.action-records.open",
+    `BH.bad-habit.${badHabit.id}.action-records.open`,
     true,
   );
 
