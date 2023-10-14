@@ -17,17 +17,13 @@ export function BadHabitDetails({
       <div className="font-bold text-center">{badHabit.name}</div>
 
       <div className="flex items-center space-x-2">
-        <div className="font-bold">Details</div>
+        <div className="font-bold" onClick={() => setOpen(!open)}>
+          Details
+        </div>
 
-        {open ? (
-          <button onClick={() => setOpen(false)}>
-            <FaAngleDown />
-          </button>
-        ) : (
-          <button onClick={() => setOpen(true)}>
-            <FaAngleRight />
-          </button>
-        )}
+        <button onClick={() => setOpen(!open)}>
+          {open ? <FaAngleDown /> : <FaAngleRight />}
+        </button>
       </div>
 
       {open && (

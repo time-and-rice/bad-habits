@@ -5,7 +5,7 @@ import invariant from "tiny-invariant";
 
 import { BadHabitAction } from "~/components/bad-habit-action";
 import { BadHabitActionRecords } from "~/components/bad-habit-action-records";
-import { BadHabitDetails } from "~/components/bad-habit-detail";
+import { BadHabitDetails } from "~/components/bad-habit-details";
 import { Fallback } from "~/components/fallback";
 import {
   BadHabitData,

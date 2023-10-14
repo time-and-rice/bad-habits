@@ -56,17 +56,13 @@ export function BadHabitAction({
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-2">
-        <div className="font-bold">Action</div>
+        <div className="font-bold" onClick={() => setOpen(!open)}>
+          Action
+        </div>
 
-        {open ? (
-          <button onClick={() => setOpen(false)}>
-            <FaAngleDown />
-          </button>
-        ) : (
-          <button onClick={() => setOpen(true)}>
-            <FaAngleRight />
-          </button>
-        )}
+        <button onClick={() => setOpen(!open)}>
+          {open ? <FaAngleDown /> : <FaAngleRight />}
+        </button>
       </div>
 
       {open && (
