@@ -5,7 +5,7 @@ import invariant from "tiny-invariant";
 
 import { BadHabitAction } from "~/components/bad-habit-action";
 import { BadHabitActionRecords } from "~/components/bad-habit-action-records";
-import { BadHabitDetail } from "~/components/bad-habit-detail";
+import { BadHabitDetails } from "~/components/bad-habit-detail";
 import { Fallback } from "~/components/fallback";
 import {
   BadHabitData,
@@ -41,7 +41,7 @@ export default function BadHabit() {
 function BadHabitView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
   return (
     <div className="space-y-8">
-      <BadHabitDetail badHabit={badHabit} />
+      <BadHabitDetails badHabit={badHabit} />
       <div className="divider" />
 
       <BadHabitAction badHabit={badHabit} />

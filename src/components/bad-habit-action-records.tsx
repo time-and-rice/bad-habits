@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { Fragment, useMemo } from "react";
 import toast from "react-hot-toast";
+import { FaAngleDown, FaAngleRight } from "react-icons/fa";
 import { useLocalStorage } from "react-use";
 import {
   CartesianGrid,
@@ -47,6 +48,11 @@ export function BadHabitActionRecords({
   badHabit: WithId<BadHabitData>;
 }) {
   const { authUser } = useAuth();
+
+  const [open, setOpen] = useLocalStorage(
+    "BH.bad-habit.action-records.open",
+    true,
+  );
 
   const [duration, setDuration] = useLocalStorage<
     "THREE_DAYS" | "FIVE_DAYS" | "SEVEN_DAYS"
@@ -91,46 +97,74 @@ export function BadHabitActionRecords({
 
   return (
     <div className="space-y-6">
-      <div className="font-bold">Action records</div>
+      <div className="flex items-center space-x-2">
+        <div className="font-bold">Action records</div>
 
-      <div className="space-x-2">
-        <button className="app-link" onClick={() => setDuration("THREE_DAYS")}>
-          3 days
-        </button>
-        <button className="app-link" onClick={() => setDuration("FIVE_DAYS")}>
-          5 days
-        </button>
-        <button className="app-link" onClick={() => setDuration("SEVEN_DAYS")}>
-          7 days
-        </button>
+        {open ? (
+          <button onClick={() => setOpen(false)}>
+            <FaAngleDown />
+          </button>
+        ) : (
+          <button onClick={() => setOpen(true)}>
+            <FaAngleRight />
+          </button>
+        )}
       </div>
 
-      <Fallback loading={isLoading} error={error as Error | undefined}>
-        {badHabitActionRecords?.length ? (
-          <Fragment>
-            {/* Graph */}
-            <div className="w-full ml-[-16px] mr-4" style={{ height: "75vh" }}>
-              <BadHabitActionRecordsGraph
-                endAtDate={endAtDate}
-                badHabitActionRecords={badHabitActionRecords ?? []}
-              />
-            </div>
+      {open && (
+        <Fragment>
+          <div className="space-x-2">
+            <button
+              className="app-link"
+              onClick={() => setDuration("THREE_DAYS")}
+            >
+              3 days
+            </button>
+            <button
+              className="app-link"
+              onClick={() => setDuration("FIVE_DAYS")}
+            >
+              5 days
+            </button>
+            <button
+              className="app-link"
+              onClick={() => setDuration("SEVEN_DAYS")}
+            >
+              7 days
+            </button>
+          </div>
 
-            {/* List */}
-            <div>
-              <div>List</div>
-              {badHabitActionRecords?.map((bhar) => (
-                <BadHabitActionRecordItem
-                  key={bhar.id}
-                  badHabitActionRecord={bhar}
-                />
-              ))}
-            </div>
-          </Fragment>
-        ) : (
-          <div className="font-bold text-center">No Data</div>
-        )}
-      </Fallback>
+          <Fallback loading={isLoading} error={error as Error | undefined}>
+            {badHabitActionRecords?.length ? (
+              <Fragment>
+                {/* Graph */}
+                <div
+                  className="w-full ml-[-16px] mr-4"
+                  style={{ height: "75vh" }}
+                >
+                  <BadHabitActionRecordsGraph
+                    endAtDate={endAtDate}
+                    badHabitActionRecords={badHabitActionRecords ?? []}
+                  />
+                </div>
+
+                {/* List */}
+                <div>
+                  <div>List</div>
+                  {badHabitActionRecords?.map((bhar) => (
+                    <BadHabitActionRecordItem
+                      key={bhar.id}
+                      badHabitActionRecord={bhar}
+                    />
+                  ))}
+                </div>
+              </Fragment>
+            ) : (
+              <div className="font-bold text-center">No Data</div>
+            )}
+          </Fallback>
+        </Fragment>
+      )}
     </div>
   );
 }

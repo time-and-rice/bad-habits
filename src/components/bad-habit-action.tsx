@@ -2,9 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDoc, Timestamp } from "firebase/firestore";
 import { capitalize } from "lodash-es";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { FaAngleDown, FaAngleRight } from "react-icons/fa";
+import { useLocalStorage } from "react-use";
 import { z } from "zod";
 
 import {
@@ -25,6 +27,8 @@ export function BadHabitAction({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
+  const [open, setOpen] = useLocalStorage("BH.bad-habit.action.open", true);
+
   const [modalShow, setModalShow] = useState(false);
   const [actionType, setActionType] =
     useState<BadHabitActionRecordData["type"]>("urge");
@@ -51,31 +55,46 @@ export function BadHabitAction({
 
   return (
     <div className="space-y-6">
-      <div className="font-bold">Action</div>
+      <div className="flex items-center space-x-2">
+        <div className="font-bold">Action</div>
 
-      <div className="flex justify-around">
-        <div className="flex flex-col items-center" onClick={onUrge}>
-          <button className="btn btn-circle w-20 h-20 btn-warning" />
-          <div className="font-semibold">Urge</div>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <button
-            className="btn btn-circle w-20 h-20 btn-success"
-            onClick={onAlternative}
-          />
-          <div className="font-semibold">Alternative</div>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <button
-            className="btn btn-circle w-20 h-20 btn-error"
-            onClick={onBad}
-          />
-          <div className="font-semibold">Bad</div>
-        </div>
+        {open ? (
+          <button onClick={() => setOpen(false)}>
+            <FaAngleDown />
+          </button>
+        ) : (
+          <button onClick={() => setOpen(true)}>
+            <FaAngleRight />
+          </button>
+        )}
       </div>
 
+      {open && (
+        <Fragment>
+          <div className="flex justify-around">
+            <div className="flex flex-col items-center" onClick={onUrge}>
+              <button className="btn btn-circle w-20 h-20 btn-warning" />
+              <div className="font-semibold">Urge</div>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <button
+                className="btn btn-circle w-20 h-20 btn-success"
+                onClick={onAlternative}
+              />
+              <div className="font-semibold">Alternative</div>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <button
+                className="btn btn-circle w-20 h-20 btn-error"
+                onClick={onBad}
+              />
+              <div className="font-semibold">Bad</div>
+            </div>
+          </div>
+        </Fragment>
+      )}
       <BadHabitActionRecordCreateFormModal
         badHabit={badHabit}
         actionType={actionType}

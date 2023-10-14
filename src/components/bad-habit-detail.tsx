@@ -1,40 +1,65 @@
+import { Fragment } from "react";
+import { FaAngleDown, FaAngleRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useLocalStorage } from "react-use";
 
 import { BadHabitData, WithId } from "~/firebase/firestore";
 
-export function BadHabitDetail({
+export function BadHabitDetails({
   badHabit,
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
+  const [open, setOpen] = useLocalStorage("BH.bad-habit.details.open", true);
+
   return (
     <div className="space-y-4">
       <div className="font-bold text-center">{badHabit.name}</div>
 
-      {badHabit.description && (
-        <div className="whitespace-pre-wrap">{badHabit.description}</div>
+      <div className="flex items-center space-x-2">
+        <div className="font-bold">Details</div>
+
+        {open ? (
+          <button onClick={() => setOpen(false)}>
+            <FaAngleDown />
+          </button>
+        ) : (
+          <button onClick={() => setOpen(true)}>
+            <FaAngleRight />
+          </button>
+        )}
+      </div>
+
+      {open && (
+        <Fragment>
+          {badHabit.description && (
+            <div className="whitespace-pre-wrap">{badHabit.description}</div>
+          )}
+
+          <div>
+            <div className="font-semibold">Pros</div>
+            <div className="whitespace-pre-wrap">{badHabit.pros}</div>
+          </div>
+
+          <div>
+            <div className="font-semibold">Cons</div>
+            <div className="whitespace-pre-wrap">{badHabit.cons}</div>
+          </div>
+
+          <div>
+            <div className="font-semibold">Alternative actions</div>
+            <div className="whitespace-pre-wrap">
+              {badHabit.alternativeActions}
+            </div>
+          </div>
+
+          <div className="text-right">
+            <Link to="edit" className="app-link">
+              Edit
+            </Link>
+          </div>
+        </Fragment>
       )}
-
-      <div>
-        <div className="font-semibold">Pros</div>
-        <div className="whitespace-pre-wrap">{badHabit.pros}</div>
-      </div>
-
-      <div>
-        <div className="font-semibold">Cons</div>
-        <div className="whitespace-pre-wrap">{badHabit.cons}</div>
-      </div>
-
-      <div>
-        <div className="font-semibold">Alternative actions</div>
-        <div className="whitespace-pre-wrap">{badHabit.alternativeActions}</div>
-      </div>
-
-      <div className="text-right">
-        <Link to="edit" className="app-link">
-          Edit
-        </Link>
-      </div>
     </div>
   );
 }
