@@ -98,7 +98,10 @@ export function BadHabitActionRecords({
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-2">
-        <div className="font-bold" onClick={() => setOpen(!open)}>
+        <div
+          className="font-bold cursor-pointer"
+          onClick={() => setOpen(!open)}
+        >
           Action records
         </div>
 
@@ -245,14 +248,15 @@ function BadHabitActionRecordItem({
 }: {
   badHabitActionRecord: WithId<BadHabitActionRecordData>;
 }) {
+  const { authUser } = useAuth();
   const client = useQueryClient();
 
-  const deleteUrgeRecord = useMutation({
+  const deleteBadHabitActionRecord = useMutation({
     mutationFn: async () => {
       await deleteDoc(
         doc(
           badHabitActionRecordsRef(
-            badHabitActionRecord.userId,
+            authUser.uid,
             badHabitActionRecord.badHabitId,
           ),
           badHabitActionRecord.id,
@@ -272,7 +276,7 @@ function BadHabitActionRecordItem({
 
   async function onDelete() {
     if (!window.confirm("Are you sure to delete?")) return;
-    await deleteUrgeRecord.mutate();
+    await deleteBadHabitActionRecord.mutate();
   }
 
   return (

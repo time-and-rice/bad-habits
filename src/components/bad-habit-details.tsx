@@ -20,7 +20,10 @@ export function BadHabitDetails({
       <div className="font-bold text-center">{badHabit.name}</div>
 
       <div className="flex items-center space-x-2">
-        <div className="font-bold" onClick={() => setOpen(!open)}>
+        <div
+          className="font-bold cursor-pointer"
+          onClick={() => setOpen(!open)}
+        >
           Details
         </div>
 

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { doc, getDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { get, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { z } from "zod";
 
@@ -140,6 +140,13 @@ function BadHabitUpdateForm({ badHabit }: { badHabit: WithId<BadHabitData> }) {
           Submit
         </button>
       </form>
+
+      <Link
+        className="app-link block mt-2"
+        to={`/me/bad-habits/${badHabit.id}`}
+      >
+        back
+      </Link>
     </div>
   );
 }

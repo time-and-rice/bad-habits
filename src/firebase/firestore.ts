@@ -12,6 +12,7 @@ import { db } from "./initialize";
  * /users
  * /users/userId/batHabits
  * /users/userId/batHabits/badHabitId/badHabitActionRecords
+ * /users/userId/badHabits/badHabitId/badHabitComments
  */
 
 /**
@@ -42,6 +43,13 @@ export type BadHabitActionRecordData = {
   badHabitId: string;
 };
 
+export type BadHabitCommentData = {
+  content: string;
+  createdAt: Timestamp;
+  userId: string;
+  badHabitId: string;
+};
+
 /**
  * Collections
  */
@@ -62,6 +70,13 @@ export const badHabitActionRecordsRef = (userId: string, badHabitId: string) =>
     badHabitId,
     "batHabitActionRecords",
   ) as CollectionReference<BadHabitActionRecordData>;
+
+export const badHabitCommentsRef = (userId: string, badHabitId: string) =>
+  collection(
+    badHabitsRef(userId),
+    badHabitId,
+    "batHabitComments",
+  ) as CollectionReference<BadHabitCommentData>;
 
 /**
  * Utils

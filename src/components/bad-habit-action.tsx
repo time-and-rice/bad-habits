@@ -59,7 +59,10 @@ export function BadHabitAction({
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-2">
-        <div className="font-bold" onClick={() => setOpen(!open)}>
+        <div
+          className="font-bold cursor-pointer"
+          onClick={() => setOpen(!open)}
+        >
           Action
         </div>
 

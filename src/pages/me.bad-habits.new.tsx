@@ -40,7 +40,7 @@ export default function BadHabitsNew() {
       alternativeActions,
     }: BadHabitsCreateFormSchema) => {
       const now = Timestamp.now();
-      return await addDoc(badHabitsRef(authUser.uid), {
+      return addDoc(badHabitsRef(authUser.uid), {
         name,
         description,
         pros,
