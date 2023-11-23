@@ -48,9 +48,9 @@ export default function BadHabitEdit() {
 const BadHabitsUpdateFormSchema = z.object({
   name: z.string().trim().min(1),
   description: z.string().trim(),
-  pros: z.string().trim().min(1),
-  cons: z.string().trim().min(1),
-  alternativeActions: z.string().trim().min(1),
+  pros: z.string().trim(),
+  cons: z.string().trim(),
+  alternativeActions: z.string().trim(),
 });
 
 type BadHabitsUpdateFormSchema = z.infer<typeof BadHabitsUpdateFormSchema>;
@@ -119,19 +119,16 @@ function BadHabitUpdateForm({ badHabit }: { badHabit: WithId<BadHabitData> }) {
         <TextareaAutosizeField
           label="Pros"
           minRows={2}
-          required
           register={register("pros")}
         />
         <TextareaAutosizeField
           label="Cons"
           minRows={2}
-          required
           register={register("cons")}
         />
         <TextareaAutosizeField
           label="Alternative actions"
           minRows={2}
-          required
           register={register("alternativeActions")}
         />
 

@@ -35,22 +35,28 @@ export function BadHabitDetails({
             <div className="whitespace-pre-wrap">{badHabit.description}</div>
           )}
 
-          <div>
-            <div className="font-semibold">Pros</div>
-            <div className="whitespace-pre-wrap">{badHabit.pros}</div>
-          </div>
-
-          <div>
-            <div className="font-semibold">Cons</div>
-            <div className="whitespace-pre-wrap">{badHabit.cons}</div>
-          </div>
-
-          <div>
-            <div className="font-semibold">Alternative actions</div>
-            <div className="whitespace-pre-wrap">
-              {badHabit.alternativeActions}
+          {badHabit.pros && (
+            <div>
+              <div className="font-semibold">Pros</div>
+              <div className="whitespace-pre-wrap">{badHabit.pros}</div>
             </div>
-          </div>
+          )}
+
+          {badHabit.cons && (
+            <div>
+              <div className="font-semibold">Cons</div>
+              <div className="whitespace-pre-wrap">{badHabit.cons}</div>
+            </div>
+          )}
+
+          {badHabit.alternativeActions && (
+            <div>
+              <div className="font-semibold">Alternative actions</div>
+              <div className="whitespace-pre-wrap">
+                {badHabit.alternativeActions}
+              </div>
+            </div>
+          )}
 
           <div className="text-right">
             <Link to="edit" className="app-link">
