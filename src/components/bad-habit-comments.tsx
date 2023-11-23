@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  InfiniteData,
   useInfiniteQuery,
   useMutation,
   useQueryClient,
@@ -146,21 +145,14 @@ function BadHabitCommentCreateForm({
       );
       return { id, ...newBadHabitCommentData };
     },
-    onSuccess: (newBadHabitComment) => {
+    onSuccess: () => {
       toast.success("Created.");
-      client.setQueryData(
-        ["me", "bad-habits", badHabit.id, "bad-habit-comments"],
-        (data: InfiniteData<WithId<BadHabitCommentData>[]> | undefined) => {
-          if (!data) return data;
-          return {
-            ...data,
-            pages: [
-              [newBadHabitComment, ...(data.pages.at(0) || [])],
-              ...data.pages.slice(1),
-            ],
-          };
-        },
-      );
+      client.invalidateQueries([
+        "me",
+        "bad-habits",
+        badHabit.id,
+        "bad-habit-comments",
+      ]);
     },
   });
 
@@ -215,18 +207,14 @@ function BadHabitCommentItem({
       );
       return badHabitComment.id;
     },
-    onSuccess: (id) => {
+    onSuccess: () => {
       toast.success("Deleted.");
-      client.setQueryData(
-        ["me", "bad-habits", badHabitComment.badHabitId, "bad-habit-comments"],
-        (data: InfiniteData<WithId<BadHabitCommentData>[]> | undefined) => {
-          if (!data) return data;
-          return {
-            ...data,
-            pages: data.pages.map((page) => page.filter((v) => v.id != id)),
-          };
-        },
-      );
+      client.invalidateQueries([
+        "me",
+        "bad-habits",
+        badHabitComment.badHabitId,
+        "bad-habit-comments",
+      ]);
     },
   });
 

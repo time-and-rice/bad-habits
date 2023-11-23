@@ -43,16 +43,12 @@ function BadHabitView({ badHabit }: { badHabit: WithId<BadHabitData> }) {
   return (
     <div className="space-y-8">
       <BadHabitDetails badHabit={badHabit} />
-      <div className="divider" />
 
       <BadHabitAction badHabit={badHabit} />
-      <div className="divider" />
 
       <BadHabitActionRecords badHabit={badHabit} />
-      <div className="divider" />
 
       <BadHabitComments badHabit={badHabit} />
-      <div className="divider" />
     </div>
   );
 }
