@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  InfiniteData,
   useInfiniteQuery,
   useMutation,
   useQueryClient,
@@ -51,7 +52,7 @@ export function BadHabitComments({
     true,
   );
 
-  const { data, isLoading, error, fetchNextPage, hasNextPage } =
+  const { data, isLoading, error, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
       queryKey: ["me", "bad-habits", badHabit.id, "bad-habit-comments"],
       queryFn: async ({ pageParam = Timestamp.now() }) => {
@@ -133,21 +134,33 @@ function BadHabitCommentCreateForm({
 
   const createBadHabitComment = useMutation({
     mutationFn: async ({ content }: BadHabitCommentCreateFormSchema) => {
-      return addDoc(badHabitCommentsRef(authUser.uid, badHabit.id), {
+      const newBadHabitCommentData: BadHabitCommentData = {
         content,
         createdAt: Timestamp.now(),
         userId: authUser.uid,
         badHabitId: badHabit.id,
-      });
+      };
+      const { id } = await addDoc(
+        badHabitCommentsRef(authUser.uid, badHabit.id),
+        newBadHabitCommentData,
+      );
+      return { id, ...newBadHabitCommentData };
     },
-    onSuccess: () => {
+    onSuccess: (newBadHabitComment) => {
       toast.success("Created.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        badHabit.id,
-        "bad-habit-comments",
-      ]);
+      client.setQueryData(
+        ["me", "bad-habits", badHabit.id, "bad-habit-comments"],
+        (data: InfiniteData<WithId<BadHabitCommentData>[]> | undefined) => {
+          if (!data) return data;
+          return {
+            ...data,
+            pages: [
+              [newBadHabitComment, ...(data.pages.at(0) || [])],
+              ...data.pages.slice(1),
+            ],
+          };
+        },
+      );
     },
   });
 
@@ -200,15 +213,20 @@ function BadHabitCommentItem({
           badHabitComment.id,
         ),
       );
+      return badHabitComment.id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       toast.success("Deleted.");
-      client.invalidateQueries([
-        "me",
-        "bad-habits",
-        badHabitComment.badHabitId,
-        "bad-habit-comments",
-      ]);
+      client.setQueryData(
+        ["me", "bad-habits", badHabitComment.badHabitId, "bad-habit-comments"],
+        (data: InfiniteData<WithId<BadHabitCommentData>[]> | undefined) => {
+          if (!data) return data;
+          return {
+            ...data,
+            pages: data.pages.map((page) => page.filter((v) => v.id != id)),
+          };
+        },
+      );
     },
   });
 
