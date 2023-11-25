@@ -231,7 +231,9 @@ function BadHabitCommentItem({
           <MenuItem onClick={onDelete}>Delete</MenuItem>
         </DotMenu>
       </div>
-      <div>{badHabitComment.content}</div>
+      <div className="whitespace-pre-wrap leading-snug">
+        {badHabitComment.content}
+      </div>
     </div>
   );
 }
