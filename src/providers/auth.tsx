@@ -1,4 +1,4 @@
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import {
   createContext,
   PropsWithChildren,
@@ -35,7 +35,6 @@ function useAuthProvider(): State {
       (e) => {
         setAuthUser(undefined);
         setError(e);
-        if (e.message == "TOKEN_EXPIRED") signOut(auth);
       },
     );
 
