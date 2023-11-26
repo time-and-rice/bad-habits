@@ -231,6 +231,7 @@ function BadHabitActionRecordsGraph({
           ticks={yTicks}
           tickFormatter={fmtYTick}
           tick={{ fontSize: 12 }}
+          reversed
         />
         <Scatter data={data.filter((v) => v.type == "urge")} fill="#fbbd23" />
         <Scatter
