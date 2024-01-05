@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import { doc, getDoc } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 
@@ -8,12 +6,8 @@ import { BadHabitActionRecords } from "~/components/bad-habit-action-records";
 import { BadHabitComments } from "~/components/bad-habit-comments";
 import { BadHabitDetails } from "~/components/bad-habit-details";
 import { Fallback } from "~/components/fallback";
-import {
-  BadHabitData,
-  badHabitsRef,
-  mapDoc,
-  WithId,
-} from "~/firebase/firestore";
+import { BadHabitData, WithId } from "~/firebase/firestore";
+import { useBadHabit } from "~/hooks/use-bad-habit";
 import { useAuth } from "~/providers/auth";
 
 export default function BadHabit() {
@@ -21,15 +15,9 @@ export default function BadHabit() {
   const { badHabitId } = useParams();
   invariant(badHabitId);
 
-  const {
-    data: badHabit,
-    isLoading,
-    error,
-  } = useQuery({
-    queryFn: () => {
-      return getDoc(doc(badHabitsRef(authUser.uid), badHabitId)).then(mapDoc);
-    },
-    queryKey: ["me", "bad-habits", badHabitId],
+  const { badHabit, isLoading, error } = useBadHabit({
+    authUserId: authUser.uid,
+    badHabitId,
   });
 
   return (

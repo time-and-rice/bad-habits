@@ -1,42 +1,20 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getDocs, orderBy, query } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
 import { Fragment } from "react";
-import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
 import { DotMenu, MenuItem } from "~/components/app-menu";
 import { Fallback } from "~/components/fallback";
-import { badHabitsRef, mapDocs } from "~/firebase/firestore";
-import { functions } from "~/firebase/initialize";
+import { useBadHabits } from "~/hooks/use-bad-habits";
+import { useDeleteBadHabit } from "~/hooks/use-delete-bad-habit";
 import { useAuth } from "~/providers/auth";
 
 export default function BadHabits() {
   const { authUser } = useAuth();
-  const client = useQueryClient();
 
-  const {
-    data: badHabits,
-    isLoading,
-    error,
-  } = useQuery({
-    queryFn: () => {
-      return getDocs(
-        query(badHabitsRef(authUser.uid), orderBy("updatedAt", "desc")),
-      ).then(mapDocs);
-    },
-    queryKey: ["me", "bad-habits"],
+  const { badHabits, isLoading, error } = useBadHabits({
+    authUserId: authUser.uid,
   });
 
-  const deleteBadHabit = useMutation({
-    mutationFn: async (badHabitId: string) => {
-      await httpsCallable(functions, "deleteBadHabit")({ badHabitId });
-    },
-    onSuccess: () => {
-      client.invalidateQueries(["me", "bad-habits"]);
-      toast.success("Deleted.");
-    },
-  });
+  const deleteBadHabit = useDeleteBadHabit();
 
   return (
     <div>

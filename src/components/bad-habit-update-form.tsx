@@ -1,18 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { get } from "lodash-es";
-import { useForm } from "react-hook-form";
+import { get, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 
-import { ErrorOrNull } from "~/components/error";
+import { BadHabitData, WithId } from "~/firebase/firestore";
+import { useUpdateBadHabit } from "~/hooks/use-update-bad-habit";
+import { useAuth } from "~/providers/auth";
+
+import { ErrorOrNull } from "./error";
 import {
   getFieldErrorMessages,
   InputField,
   TextareaAutosizeField,
-} from "~/components/form";
-import { useCreateBadHabit } from "~/hooks/use-create-bad-habit";
-import { useAuth } from "~/providers/auth";
+} from "./form";
 
-export const BadHabitsCreateFormSchema = z.object({
+export const BadHabitsUpdateFormSchema = z.object({
   name: z.string().trim().min(1),
   description: z.string().trim(),
   pros: z.string().trim(),
@@ -20,33 +22,47 @@ export const BadHabitsCreateFormSchema = z.object({
   alternativeActions: z.string().trim(),
 });
 
-export type BadHabitsCreateFormSchema = z.infer<
-  typeof BadHabitsCreateFormSchema
+export type BadHabitsUpdateFormSchema = z.infer<
+  typeof BadHabitsUpdateFormSchema
 >;
 
-export default function BadHabitsNew() {
+export function BadHabitUpdateForm({
+  badHabit,
+}: {
+  badHabit: WithId<BadHabitData>;
+}) {
   const { authUser } = useAuth();
 
-  const createBadHabit = useCreateBadHabit({ authUserId: authUser.uid });
+  const updateBadHabit = useUpdateBadHabit({
+    authUserId: authUser.uid,
+    badHabitId: badHabit.id,
+  });
 
   const {
     handleSubmit,
     register,
     formState: { errors: fieldErrors },
-  } = useForm<BadHabitsCreateFormSchema>({
-    resolver: zodResolver(BadHabitsCreateFormSchema),
+  } = useForm<BadHabitsUpdateFormSchema>({
+    resolver: zodResolver(BadHabitsUpdateFormSchema),
+    defaultValues: {
+      name: badHabit.name,
+      description: badHabit.description,
+      pros: badHabit.pros,
+      cons: badHabit.cons,
+      alternativeActions: badHabit.alternativeActions,
+    },
   });
 
   return (
     <div>
-      <h1 className="text-center">New Bad Habit</h1>
+      <h1 className="text-center">Edit Bad Habit</h1>
 
       <form
         className="space-y-4"
-        onSubmit={handleSubmit((v) => createBadHabit.mutate(v))}
+        onSubmit={handleSubmit((v) => updateBadHabit.mutate(v))}
       >
         <ErrorOrNull errorMessage={getFieldErrorMessages(fieldErrors)} />
-        <ErrorOrNull errorMessage={get(createBadHabit, "error.message")} />
+        <ErrorOrNull errorMessage={get(updateBadHabit, "error.message")} />
 
         <InputField label="Name" required register={register("name")} />
         <TextareaAutosizeField
@@ -73,11 +89,18 @@ export default function BadHabitsNew() {
         <button
           type="submit"
           className="btn w-full"
-          disabled={createBadHabit.isLoading}
+          disabled={updateBadHabit.isLoading}
         >
           Submit
         </button>
       </form>
+
+      <Link
+        className="app-link block mt-2"
+        to={`/me/bad-habits/${badHabit.id}`}
+      >
+        back
+      </Link>
     </div>
   );
 }
