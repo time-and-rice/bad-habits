@@ -3,23 +3,23 @@ import { deleteDoc, doc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 import { badHabitActionRecordsRef } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
 export function useDeleteBadHabitActionRecord({
-  authUserId,
   badHabitId,
   badHabitActionRecordId,
 }: {
-  authUserId: string;
   badHabitId: string;
   badHabitActionRecordId: string;
 }) {
+  const { authUser } = useAuth();
   const client = useQueryClient();
 
   const deleteBadHabitActionRecord = useMutation({
     mutationFn: async () => {
       await deleteDoc(
         doc(
-          badHabitActionRecordsRef(authUserId, badHabitId),
+          badHabitActionRecordsRef(authUser.uid, badHabitId),
           badHabitActionRecordId,
         ),
       );

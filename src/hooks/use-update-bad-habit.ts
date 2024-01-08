@@ -5,14 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 import { BadHabitsUpdateFormSchema } from "~/components/bad-habit-update-form";
 import { badHabitsRef } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
-export function useUpdateBadHabit({
-  authUserId,
-  badHabitId,
-}: {
-  authUserId: string;
-  badHabitId: string;
-}) {
+export function useUpdateBadHabit({ badHabitId }: { badHabitId: string }) {
+  const { authUser } = useAuth();
   const client = useQueryClient();
   const navigate = useNavigate();
 
@@ -24,7 +20,7 @@ export function useUpdateBadHabit({
       cons,
       alternativeActions,
     }: BadHabitsUpdateFormSchema) => {
-      await updateDoc(doc(badHabitsRef(authUserId), badHabitId), {
+      await updateDoc(doc(badHabitsRef(authUser.uid), badHabitId), {
         name,
         description,
         pros,

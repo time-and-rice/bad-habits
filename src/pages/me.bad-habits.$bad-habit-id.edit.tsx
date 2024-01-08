@@ -4,15 +4,12 @@ import invariant from "tiny-invariant";
 import { BadHabitUpdateForm } from "~/components/bad-habit-update-form";
 import { Fallback } from "~/components/fallback";
 import { useBadHabit } from "~/hooks/use-bad-habit";
-import { useAuth } from "~/providers/auth";
 
 export default function BadHabitEdit() {
-  const { authUser } = useAuth();
   const { badHabitId } = useParams();
   invariant(badHabitId);
 
   const { badHabit, isLoading, error } = useBadHabit({
-    authUserId: authUser.uid,
     badHabitId,
   });
 

@@ -2,7 +2,6 @@ import { format } from "date-fns";
 
 import { BadHabitCommentData, WithId } from "~/firebase/firestore";
 import { useDeleteBadHabitComment } from "~/hooks/use-delete-bad-habit-comment";
-import { useAuth } from "~/providers/auth";
 
 import { DotMenu, MenuItem } from "./app-menu";
 
@@ -13,10 +12,7 @@ export function BadHabitCommentItem({
 }: {
   badHabitComment: WithId<BadHabitCommentData>;
 }) {
-  const { authUser } = useAuth();
-
   const deleteBadHabitComment = useDeleteBadHabitComment({
-    authUserId: authUser.uid,
     badHabitId: badHabitComment.badHabitId,
     badHabitCommentId: badHabitComment.id,
   });

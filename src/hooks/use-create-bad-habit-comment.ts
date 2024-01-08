@@ -4,14 +4,14 @@ import toast from "react-hot-toast";
 
 import { BadHabitCommentCreateFormSchema } from "~/components/bad-habit-comment-create-form";
 import { BadHabitCommentData, badHabitCommentsRef } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
 export function useCreateBadHabitComment({
-  authUserId,
   badHabitId,
 }: {
-  authUserId: string;
   badHabitId: string;
 }) {
+  const { authUser } = useAuth();
   const client = useQueryClient();
 
   const createBadHabitComment = useMutation({
@@ -19,11 +19,11 @@ export function useCreateBadHabitComment({
       const newBadHabitCommentData: BadHabitCommentData = {
         content,
         createdAt: Timestamp.now(),
-        userId: authUserId,
+        userId: authUser.uid,
         badHabitId,
       };
       const { id } = await addDoc(
-        badHabitCommentsRef(authUserId, badHabitId),
+        badHabitCommentsRef(authUser.uid, badHabitId),
         newBadHabitCommentData,
       );
       return { id, ...newBadHabitCommentData };

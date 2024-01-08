@@ -7,24 +7,24 @@ import {
   BadHabitActionRecordData,
   badHabitActionRecordsRef,
 } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
 export function useCreateBadHabitActionRecord({
-  authUserId,
   badHabitId,
   actionType,
 }: {
-  authUserId: string;
   badHabitId: string;
   actionType: BadHabitActionRecordData["type"];
 }) {
+  const { authUser } = useAuth();
   const client = useQueryClient();
 
   const createBadHabitActionRecord = useMutation({
     mutationFn: async ({ createdAt }: BadHabitActionRecordCreateFormSchema) => {
-      return await addDoc(badHabitActionRecordsRef(authUserId, badHabitId), {
+      return await addDoc(badHabitActionRecordsRef(authUser.uid, badHabitId), {
         type: actionType,
         createdAt: Timestamp.fromDate(new Date(createdAt)),
-        userId: authUserId,
+        userId: authUser.uid,
         badHabitId,
       });
     },

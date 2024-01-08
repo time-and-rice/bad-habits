@@ -4,7 +4,6 @@ import { useLocalStorage } from "react-use";
 
 import { BadHabitData, WithId } from "~/firebase/firestore";
 import { useBadHabitComments } from "~/hooks/use-bad-habit-comments";
-import { useAuth } from "~/providers/auth";
 
 import { BadHabitCommentCreateForm } from "./bad-habit-comment-create-form";
 import { BadHabitCommentItem } from "./bad-habit-comment-item";
@@ -15,8 +14,6 @@ export function BadHabitComments({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
-  const { authUser } = useAuth();
-
   const [open, setOpen] = useLocalStorage(
     `BH.bad-habit.${badHabit.id}.comments.open`,
     true,
@@ -24,7 +21,6 @@ export function BadHabitComments({
 
   const { badHabitComments, isLoading, error, hasNextPage, fetchNextPage } =
     useBadHabitComments({
-      authUserId: authUser.uid,
       badHabitId: badHabit.id,
     });
 

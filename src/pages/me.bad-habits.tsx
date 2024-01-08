@@ -5,14 +5,9 @@ import { DotMenu, MenuItem } from "~/components/app-menu";
 import { Fallback } from "~/components/fallback";
 import { useBadHabits } from "~/hooks/use-bad-habits";
 import { useDeleteBadHabit } from "~/hooks/use-delete-bad-habit";
-import { useAuth } from "~/providers/auth";
 
 export default function BadHabits() {
-  const { authUser } = useAuth();
-
-  const { badHabits, isLoading, error } = useBadHabits({
-    authUserId: authUser.uid,
-  });
+  const { badHabits, isLoading, error } = useBadHabits();
 
   const deleteBadHabit = useDeleteBadHabit();
 

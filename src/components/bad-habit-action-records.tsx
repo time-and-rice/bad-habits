@@ -7,7 +7,6 @@ import {
   BadHabitActionRecordsDuration,
   useBadHabitActionRecords,
 } from "~/hooks/use-bad-habit-action-records";
-import { useAuth } from "~/providers/auth";
 
 import { BadHabitActionRecordItem } from "./bad-habit-action-record-item";
 import { BadHabitActionRecordsGraph } from "./bad-habit-action-records-graph";
@@ -18,8 +17,6 @@ export function BadHabitActionRecords({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
-  const { authUser } = useAuth();
-
   const [open, setOpen] = useLocalStorage(
     `BH.bad-habit.${badHabit.id}.action-records.open`,
     true,
@@ -33,7 +30,6 @@ export function BadHabitActionRecords({
 
   const { badHabitActionRecords, endAtDate, isLoading, error } =
     useBadHabitActionRecords({
-      authUserId: authUser.uid,
       badHabitId: badHabit.id,
       duration: duration as BadHabitActionRecordsDuration,
     });

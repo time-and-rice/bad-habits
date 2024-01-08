@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { BadHabitData, WithId } from "~/firebase/firestore";
 import { useCreateBadHabitComment } from "~/hooks/use-create-bad-habit-comment";
-import { useAuth } from "~/providers/auth";
 
 import { ErrorOrNull } from "./error";
 import { getFieldErrorMessages, TextareaAutosizeField } from "./form";
@@ -22,10 +21,7 @@ export function BadHabitCommentCreateForm({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
-  const { authUser } = useAuth();
-
   const createBadHabitComment = useCreateBadHabitComment({
-    authUserId: authUser.uid,
     badHabitId: badHabit.id,
   });
 

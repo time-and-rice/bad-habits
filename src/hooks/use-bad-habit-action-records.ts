@@ -4,6 +4,7 @@ import { endAt, getDocs, orderBy, query } from "firebase/firestore";
 import { useMemo } from "react";
 
 import { badHabitActionRecordsRef, mapDocs } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
 export type BadHabitActionRecordsDuration =
   | "THREE_DAYS"
@@ -11,14 +12,14 @@ export type BadHabitActionRecordsDuration =
   | "SEVEN_DAYS";
 
 export function useBadHabitActionRecords({
-  authUserId,
   badHabitId,
   duration,
 }: {
-  authUserId: string;
   badHabitId: string;
   duration: BadHabitActionRecordsDuration;
 }) {
+  const { authUser } = useAuth();
+
   const endAtDate = useMemo(() => {
     const now = new Date();
     switch (duration) {
@@ -41,7 +42,7 @@ export function useBadHabitActionRecords({
     queryFn: () => {
       return getDocs(
         query(
-          badHabitActionRecordsRef(authUserId, badHabitId),
+          badHabitActionRecordsRef(authUser.uid, badHabitId),
           orderBy("createdAt", "desc"),
           endAt(endAtDate),
         ),

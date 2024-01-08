@@ -3,22 +3,22 @@ import { deleteDoc, doc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 import { badHabitCommentsRef } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
 export function useDeleteBadHabitComment({
-  authUserId,
   badHabitId,
   badHabitCommentId,
 }: {
-  authUserId: string;
   badHabitId: string;
   badHabitCommentId: string;
 }) {
+  const { authUser } = useAuth();
   const client = useQueryClient();
 
   const deleteBadHabitComment = useMutation({
     mutationFn: async () => {
       await deleteDoc(
-        doc(badHabitCommentsRef(authUserId, badHabitId), badHabitCommentId),
+        doc(badHabitCommentsRef(authUser.uid, badHabitId), badHabitCommentId),
       );
       return badHabitCommentId;
     },

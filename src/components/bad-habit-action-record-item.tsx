@@ -3,7 +3,6 @@ import { format } from "date-fns";
 
 import { BadHabitActionRecordData, WithId } from "~/firebase/firestore";
 import { useDeleteBadHabitActionRecord } from "~/hooks/use-delete-bad-habit-action-record";
-import { useAuth } from "~/providers/auth";
 
 import { DotMenu, MenuItem } from "./app-menu";
 
@@ -14,10 +13,7 @@ export function BadHabitActionRecordItem({
 }: {
   badHabitActionRecord: WithId<BadHabitActionRecordData>;
 }) {
-  const { authUser } = useAuth();
-
   const deleteBadHabitActionRecord = useDeleteBadHabitActionRecord({
-    authUserId: authUser.uid,
     badHabitId: badHabitActionRecord.badHabitId,
     badHabitActionRecordId: badHabitActionRecord.id,
   });

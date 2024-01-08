@@ -5,8 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 import { badHabitsRef } from "~/firebase/firestore";
 import { BadHabitsCreateFormSchema } from "~/pages/me.bad-habits.new";
+import { useAuth } from "~/providers/auth";
 
-export function useCreateBadHabit({ authUserId }: { authUserId: string }) {
+export function useCreateBadHabit() {
+  const { authUser } = useAuth();
   const client = useQueryClient();
   const navigate = useNavigate();
 
@@ -19,7 +21,7 @@ export function useCreateBadHabit({ authUserId }: { authUserId: string }) {
       alternativeActions,
     }: BadHabitsCreateFormSchema) => {
       const now = Timestamp.now();
-      return addDoc(badHabitsRef(authUserId), {
+      return addDoc(badHabitsRef(authUser.uid), {
         name,
         description,
         pros,
@@ -27,7 +29,7 @@ export function useCreateBadHabit({ authUserId }: { authUserId: string }) {
         alternativeActions,
         createdAt: now,
         updatedAt: now,
-        userId: authUserId,
+        userId: authUser.uid,
       });
     },
     onSuccess: (data) => {

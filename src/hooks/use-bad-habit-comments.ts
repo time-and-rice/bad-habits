@@ -9,21 +9,18 @@ import {
 } from "firebase/firestore";
 
 import { badHabitCommentsRef, mapDocs } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
-export function useBadHabitComments({
-  authUserId,
-  badHabitId,
-}: {
-  authUserId: string;
-  badHabitId: string;
-}) {
+export function useBadHabitComments({ badHabitId }: { badHabitId: string }) {
+  const { authUser } = useAuth();
+
   const { data, isLoading, error, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
       queryKey: ["me", "bad-habits", badHabitId, "bad-habit-comments"],
       queryFn: async ({ pageParam = Timestamp.now() }) => {
         return getDocs(
           query(
-            badHabitCommentsRef(authUserId, badHabitId),
+            badHabitCommentsRef(authUser.uid, badHabitId),
             orderBy("createdAt", "desc"),
             startAfter(pageParam),
             limit(10),

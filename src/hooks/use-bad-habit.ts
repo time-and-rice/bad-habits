@@ -2,21 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
 
 import { badHabitsRef, mapDoc } from "~/firebase/firestore";
+import { useAuth } from "~/providers/auth";
 
-export function useBadHabit({
-  authUserId,
-  badHabitId,
-}: {
-  authUserId: string;
-  badHabitId: string;
-}) {
+export function useBadHabit({ badHabitId }: { badHabitId: string }) {
+  const { authUser } = useAuth();
+
   const {
     data: badHabit,
     isLoading,
     error,
   } = useQuery({
     queryFn: () => {
-      return getDoc(doc(badHabitsRef(authUserId), badHabitId)).then(mapDoc);
+      return getDoc(doc(badHabitsRef(authUser.uid), badHabitId)).then(mapDoc);
     },
     queryKey: ["me", "bad-habits", badHabitId],
   });

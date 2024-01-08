@@ -11,7 +11,6 @@ import {
 } from "~/firebase/firestore";
 import { useCreateBadHabitActionRecord } from "~/hooks/use-create-bad-habit-action-record";
 import { DateTimeFormat, genDate } from "~/lib/date";
-import { useAuth } from "~/providers/auth";
 
 import { AppModal } from "./app-modal";
 import { ErrorOrNull } from "./error";
@@ -36,10 +35,7 @@ export function BadHabitActionRecordCreateFormModal({
   show: boolean;
   onClose: () => void;
 }) {
-  const { authUser } = useAuth();
-
   const createBadHabitActionRecord = useCreateBadHabitActionRecord({
-    authUserId: authUser.uid,
     badHabitId: badHabit.id,
     actionType,
   });

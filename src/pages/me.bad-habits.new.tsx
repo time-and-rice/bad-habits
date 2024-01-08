@@ -10,7 +10,6 @@ import {
   TextareaAutosizeField,
 } from "~/components/form";
 import { useCreateBadHabit } from "~/hooks/use-create-bad-habit";
-import { useAuth } from "~/providers/auth";
 
 export const BadHabitsCreateFormSchema = z.object({
   name: z.string().trim().min(1),
@@ -25,9 +24,7 @@ export type BadHabitsCreateFormSchema = z.infer<
 >;
 
 export default function BadHabitsNew() {
-  const { authUser } = useAuth();
-
-  const createBadHabit = useCreateBadHabit({ authUserId: authUser.uid });
+  const createBadHabit = useCreateBadHabit();
 
   const {
     handleSubmit,

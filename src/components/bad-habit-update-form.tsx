@@ -5,7 +5,6 @@ import { z } from "zod";
 
 import { BadHabitData, WithId } from "~/firebase/firestore";
 import { useUpdateBadHabit } from "~/hooks/use-update-bad-habit";
-import { useAuth } from "~/providers/auth";
 
 import { ErrorOrNull } from "./error";
 import {
@@ -31,10 +30,7 @@ export function BadHabitUpdateForm({
 }: {
   badHabit: WithId<BadHabitData>;
 }) {
-  const { authUser } = useAuth();
-
   const updateBadHabit = useUpdateBadHabit({
-    authUserId: authUser.uid,
     badHabitId: badHabit.id,
   });
 
